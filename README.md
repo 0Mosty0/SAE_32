@@ -24,3 +24,4 @@ Choix final pour réaliser le projet :
 Source: 
 - https://info.blaisepascal.fr/nsi-authentification-sur-un-site-web/ (authentification sur un site web avec python: flask framework)
 - https://medium.com/featurepreneur/ssh-in-python-using-paramiko-e08fd8a039f7 (utiliser paramiko pour connection ssh) 
+- https://leafletjs.com (permet de mettre une map sur html) 
