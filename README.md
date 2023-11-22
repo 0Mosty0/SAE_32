@@ -22,10 +22,5 @@ Choix final pour réaliser le projet :
 <br>
 
 Source: 
-- https://info.blaisepascal.fr/nsi-authentification-sur-un-site-web/
-- https://www.w3schools.com/html/default.asp
-- https://www.w3schools.com/python/default.asp
-- https://www.w3schools.com/js/default.asp
-- https://www.w3schools.com/css/default.asp 
-- https://docs.framasoft.org/fr/grav/markdown.html
-- https://medium.com/featurepreneur/ssh-in-python-using-paramiko-e08fd8a039f7
+- https://info.blaisepascal.fr/nsi-authentification-sur-un-site-web/ (authentification sur un site web avec python: flask framework)
+- https://medium.com/featurepreneur/ssh-in-python-using-paramiko-e08fd8a039f7 (utiliser paramiko pour connection ssh) 
