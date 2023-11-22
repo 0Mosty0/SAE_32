@@ -19,7 +19,7 @@ Choix final pour réaliser le projet :
 | Optimisation de la Localisation en Temps Réel SQLite | Adapté au suivi GPS en temps réel.| Pour des volumes de données massifs, d'autres bases de données géospatiales peuvent être plus performantes. |
 | Contrôle des Droits Système personnalisé de gestion des droits | Possibilité de personnaliser les rôles des utilisateurs. | La mise en place d'un système de gestion des droits peut être un effort supplémentaire. |
 
-
+<br>
 
 Source: 
 - https://info.blaisepascal.fr/nsi-authentification-sur-un-site-web/
