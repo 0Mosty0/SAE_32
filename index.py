@@ -5,7 +5,7 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 # Pages HTML
-pageACCUEIL = "templates/index.html"
+pageACCUEIL = "templates/base.html"
 
 ############################################################################################
 @app.route("/")
