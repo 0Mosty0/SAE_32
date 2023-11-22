@@ -1,19 +1,35 @@
-{% extends "base.html" %}
-{% block title %}Inscription{% endblock %}
-{% block content %}
-    <div>
-        <h2>Inscription</h2>
-        <form action="/signup" method="post"> <!-- Correction de l'action -->
-            <label for="nom">Nom :</label>
-            <input type="text" id="nom" name="nom" required><br>
-
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" required><br>
-
-            <label for="mot_de_passe">Mot de passe :</label>
-            <input type="password" id="mot_de_passe" name="mot_de_passe" required><br>
-
-            <input type="submit" value="S'inscrire">
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SAE-302</title>
+    <link rel="stylesheet" href="../static/css/style_signup.css">
+</head>
+<body>
+    <div class="container">
+        <div>
+            <img class="logo" src="../static/img/logo.png" alt="logo">
+            <h2>Bienvenue</h2>
+        </div>
+        <form action="/signup" method="post">
+            <div class="form-group">
+            <label class="label" for="nom">Nom :</label>
+            <input class="input" type="text" id="nom" name="nom" required><br>
+        </div>
+        <div class="form-group">
+            <label class="label" for="email">Email :</label>
+            <input class="input" type="email" id="email" name="email" required><br>
+        </div>
+        <div class="form-group">
+            <label class="label" for="mot_de_passe">Mot de passe :</label>
+            <input class="input" type="password" id="mot_de_passe" name="mot_de_passe" required><br>
+        </div>
+        <div class="form-group">
+            <input class="button" type="submit" value="S'inscrire">
+            <a href="login.html">Se connecter</a>
+        </div>
         </form>
+
     </div>
-{% endblock %}
+</body>
