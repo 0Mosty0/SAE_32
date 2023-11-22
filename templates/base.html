@@ -1,13 +1,70 @@
 <!DOCTYPE html>
-<html lang="fr-FR">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SAE-302</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi de Colis</title>
+    <style>
+        /* Ajoutez votre style CSS ici */
+        #map {
+            height: 300px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div>
-        <h1 style="align-content: center;">SAE-302</h1>
-    </div>
+    <h1>Suivi de Colis</h1>
+    <label for="code_colis">Code du Colis :</label>
+    <input type="text" id="code_colis" name="code_colis">
+    <button onclick="getColisStatut()">Rechercher</button>
+    <div id="resultat"></div>
+
+    <h2>Suivi GPS</h2>
+    <div id="map"></div>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
+
+    <script>
+        mapboxgl.accessToken = 'VOTRE_CLE_API_MAPBOX';
+
+        function getColisStatut() {
+            var code_colis = document.getElementById('code_colis').value;
+
+            // Effectuer une requête AJAX vers l'API REST Flask
+            fetch('https://127.0.0.1:5000/colis?code_colis=' + code_colis)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Colis non trouvé');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('resultat').innerHTML = "Statut du Colis : " + data[0].statut;
+
+                    // Mettre à jour la carte avec les nouvelles coordonnées
+                    updateMap(data[0].coordinates);
+                })
+                .catch(error => {
+                    document.getElementById('resultat').innerHTML = error.message;
+                });
+        }
+
+        function updateMap(coordinates) {
+            // Simuler une carte avec les coordonnées
+            var map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: coordinates || [0, 0],
+                zoom: 8
+            });
+
+            // Ajouter un marqueur à la position actuelle
+            new mapboxgl.Marker()
+                .setLngLat(coordinates || [0, 0])
+                .addTo(map);
+        }
+    </script>
 </body>
 </html>
+
