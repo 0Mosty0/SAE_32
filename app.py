@@ -1,46 +1,69 @@
 import pymysql
 from flask import Flask, render_template, request, redirect, url_for
-from werkzeug.security import generate_password_hash
-from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from validate_email_address import validate_email
 import re
+from sshtunnel import SSHTunnelForwarder
+import pandas as pd
+import paramiko
+from sshtunnel import SSHTunnelForwarder
+from os.path import expanduser
 
 app = Flask(__name__)
 
 # Configuration de la base de données
-app.config['MYSQL_DATABASE_USER'] = 'phpmyadmin'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
-app.config['MYSQL_DATABASE_DB'] = 'db_SAE32'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql = pymysql.connect(
-    host=app.config['MYSQL_DATABASE_HOST'],
-    user=app.config['MYSQL_DATABASE_USER'],
-    password=app.config['MYSQL_DATABASE_PASSWORD'],
-    db=app.config['MYSQL_DATABASE_DB'],
-)
+mysql_config = {
+    'user': '22206879',
+    'password': '810541',
+    'database': 'db_MUXART',
+}
 
-# Fonction pour initialiser la base de données
-def init_db():
-    with app.app_context():
-        cursor = mysql.cursor()
-        with app.open_resource('schema.sql', mode='r') as f:
-            for query in f.read().split(';'):
-                if query.strip():
-                    cursor.execute(query)
+ssh_config = {
+    'hostname': '194.199.227.110',
+    'port': 22,
+    'username': 'u22206879',
+    'password': '810541',  # Replace with your actual SSH password
 
-        # Ajout d'une vérification si les tables existent
-        cursor.execute("SHOW TABLES")
-        tables = cursor.fetchall()
-        if not tables:
-            mysql.commit()
+}
+
+# Connexion SSH
+ssh_client = paramiko.SSHClient()
+ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh_client.connect(ssh_config)
+
+# Créer un tunnel SSH
+with SSHTunnelForwarder(
+    (ssh_config['hostname'], ssh_config['port']),
+    ssh_username=ssh_config['username'],
+    ssh_password=ssh_config['password'],
+    remote_bind_address=('127.0.0.1', 3306),
+) as tunnel:
+    # Mettre à jour la configuration MySQL pour utiliser le tunnel SSH
+    mysql_config['host'] = '127.0.0.1'
+    mysql_config['port'] = tunnel.local_bind_port
+
+    # Se connecter à la base de données MySQL via le tunnel SSH
+    mysql = pymysql.connect(**mysql_config)
+
+    def init_db():
+        with app.app_context():
+            cursor = mysql.cursor()
+            with app.open_resource('schema.sql', mode='r') as f:
+                for query in f.read().split(';'):
+                    if query.strip():
+                        cursor.execute(query)
+
+            # Ajout d'une vérification si les tables existent
+            cursor.execute("SHOW TABLES")
+            tables = cursor.fetchall()
+            if not tables:
+                mysql.commit()
 
 # Route pour la page d'accueil
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
-# ...
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -128,9 +151,9 @@ def login():
 
     return render_template('login.html', email_not_found=email_not_found, incorrect_password=incorrect_password)
 
-
-
-
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
+
+# Fermer la connexion MySQL à la fin du programme
+ssh_client.close()
