@@ -28,3 +28,4 @@ Source:
 - https://www.w3schools.com/js/default.asp
 - https://www.w3schools.com/css/default.asp 
 - https://docs.framasoft.org/fr/grav/markdown.html
+- https://medium.com/featurepreneur/ssh-in-python-using-paramiko-e08fd8a039f7
