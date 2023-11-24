@@ -1,159 +1,117 @@
 import pymysql
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from validate_email_address import validate_email
 import re
-from sshtunnel import SSHTunnelForwarder
-import pandas as pd
-import paramiko
-from sshtunnel import SSHTunnelForwarder
-from os.path import expanduser
 
 app = Flask(__name__)
 
 # Configuration de la base de données
 mysql_config = {
-    'user': '22206879',
-    'password': '810541',
-    'database': 'db_MUXART',
+    'host': '127.0.0.1',
+    'user': 'phpmyadmin',
+    'password': 'root',
+    'database': 'db_SAE32',
+    'port': 3306,
 }
 
-ssh_config = {
-    'hostname': '194.199.227.110',
-    'port': 22,
-    'username': 'u22206879',
-    'password': '810541',  # Replace with your actual SSH password
+# Connexion à la base de données MySQL
+mysql = pymysql.connect(**mysql_config)
 
-}
+# Secret key for session management
+app.secret_key = 'your_secret_key'
 
-# Connexion SSH
-ssh_client = paramiko.SSHClient()
-ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh_client.connect(ssh_config)
-
-# Créer un tunnel SSH
-with SSHTunnelForwarder(
-    (ssh_config['hostname'], ssh_config['port']),
-    ssh_username=ssh_config['username'],
-    ssh_password=ssh_config['password'],
-    remote_bind_address=('127.0.0.1', 3306),
-) as tunnel:
-    # Mettre à jour la configuration MySQL pour utiliser le tunnel SSH
-    mysql_config['host'] = '127.0.0.1'
-    mysql_config['port'] = tunnel.local_bind_port
-
-    # Se connecter à la base de données MySQL via le tunnel SSH
-    mysql = pymysql.connect(**mysql_config)
-
-    def init_db():
-        with app.app_context():
-            cursor = mysql.cursor()
-            with app.open_resource('schema.sql', mode='r') as f:
-                for query in f.read().split(';'):
-                    if query.strip():
-                        cursor.execute(query)
-
-            # Ajout d'une vérification si les tables existent
-            cursor.execute("SHOW TABLES")
-            tables = cursor.fetchall()
-            if not tables:
-                mysql.commit()
-
-# Route pour la page d'accueil
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    email_valid = True  # Par défaut, l'e-mail est considéré comme valide
-    password_valid = True  # Par défaut, le mot de passe est considéré comme valide
-    email_exists = False  # Par défaut, l'e-mail n'existe pas dans la base de données
-    password_match = True  # Par défaut, les mots de passe correspondent
-
     if request.method == 'POST':
         nom = request.form.get('nom')
         email = request.form.get('email')
         mot_de_passe = request.form.get('mot_de_passe')
         confirmation_mot_de_passe = request.form.get('confirmation_mot_de_passe')
 
-        # Validation de l'e-mail
         email_valid = validate_email(email)
 
-        # Validation du mot de passe
         if not email_valid or len(mot_de_passe) < 8 or not re.search("[A-Z]", mot_de_passe) or not re.search("[!@#$%^&*(),.?\":{}|<>]", mot_de_passe):
-            password_valid = False
+            flash("Veuillez saisir une adresse e-mail valide et un mot de passe fort.", 'danger')
+            return render_template('signup.html', email_valid=email_valid)
 
-        # Vérification de l'existence de l'e-mail dans la base de données
-        query_check_email = 'SELECT * FROM utilisateurs WHERE email = %s'
-        data_check_email = (email,)
-
+        # Vérifier si l'e-mail existe déjà
         with mysql.cursor() as cursor:
-            cursor.execute(query_check_email, data_check_email)
-            if cursor.fetchone():
-                email_exists = True
+            try:
+                cursor.execute('SELECT * FROM utilisateurs WHERE email = %s', (email,))
+                if cursor.fetchone():
+                    flash("L'adresse e-mail existe déjà.", 'danger')
+                    return render_template('signup.html', email_valid=email_valid)
+            except pymysql.Error as e:
+                print(f"Erreur lors de la vérification de l'e-mail existant : {e}")
+                flash("Erreur lors de la vérification de l'e-mail existant.", 'danger')
+                return render_template('signup.html', email_valid=email_valid)
 
-        # Vérification de la correspondance des mots de passe
         if mot_de_passe != confirmation_mot_de_passe:
-            password_match = False
+            flash("Les mots de passe ne correspondent pas.", 'danger')
+            return render_template('signup.html', email_valid=email_valid)
 
-        if not email_valid or not password_valid or email_exists or not password_match:
-            return render_template('signup.html', email_valid=email_valid, password_valid=password_valid, email_exists=email_exists, password_match=password_match)
-
-        # Hash du mot de passe avant de le stocker dans la base de données
         mot_de_passe_hash = generate_password_hash(mot_de_passe)
 
-        # Stockage des informations dans la base de données MySQL
+        # Insérer l'utilisateur dans la base de données
         query_insert_user = 'INSERT INTO utilisateurs (nom, email, mot_de_passe) VALUES (%s, %s, %s)'
         data_insert_user = (nom, email, mot_de_passe_hash)
 
-        try:
-            with mysql.cursor() as cursor:
+        with mysql.cursor() as cursor:
+            try:
                 cursor.execute(query_insert_user, data_insert_user)
                 mysql.commit()
-            return redirect(url_for('index'))
-        except Exception as e:
-            print(f"Erreur lors de l'inscription : {e}")
-            return "Erreur lors de l'inscription"
+                flash("Inscription réussie. Vous pouvez maintenant vous connecter.", 'success')
+                return redirect(url_for('login'))
+            except pymysql.Error as e:
+                print(f"Erreur lors de l'inscription : {e}")
+                flash("Erreur lors de l'inscription.", 'danger')
 
-    # Si c'est une requête GET ou une soumission de formulaire invalide, afficher la page de signup
-    return render_template('signup.html', email_valid=email_valid, password_valid=password_valid, email_exists=email_exists, password_match=password_match)
+    return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    email_not_found = False
-    incorrect_password = False
+    error_messages = []
 
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('mot_de_passe')
 
-        query_check_user = 'SELECT * FROM utilisateurs WHERE email = %s'
-        data_check_user = (email,)
-
+        # Vérifier l'existence de l'utilisateur et la validité du mot de passe
         with mysql.cursor() as cursor:
-            cursor.execute(query_check_user, data_check_user)
-            user = cursor.fetchone()
+            try:
+                cursor.execute('SELECT * FROM utilisateurs WHERE email = %s', (email,))
+                utilisateur = cursor.fetchone()
 
-            if user:
-                # Utilisateur trouvé, vérifier le mot de passe
-                if user and check_password_hash(user['mot_de_passe'], password):
-                    # Mot de passe correct, connectez l'utilisateur
-                    # Vous pouvez ajouter une session utilisateur ici si nécessaire
-                    return redirect(url_for('index'))
+                if utilisateur and check_password_hash(utilisateur[3], password):
+                    # Connexion réussie, enregistrez les informations de session
+                    session['loggedin'] = True
+                    session['id'] = utilisateur[0]
+                    session['nom'] = utilisateur[1]
+                    session['email'] = utilisateur[2]
+                    return redirect(url_for('dashboard'))
                 else:
-                    # Mot de passe incorrect
-                    incorrect_password = True
-            else:
-                # Adresse e-mail non trouvée
-                email_not_found = True
+                    error_messages.append("Adresse e-mail ou mot de passe incorrects.")
 
-    return render_template('login.html', email_not_found=email_not_found, incorrect_password=incorrect_password)
+            except pymysql.Error as e:
+                print(f"Erreur lors de la connexion : {e}")
+                error_messages.append("Erreur lors de la connexion.")
+
+    # Passer les messages d'erreur directement au template
+    return render_template('login.html', error_messages=error_messages)
+
+@app.route('/dashboard')
+def dashboard():
+    if 'loggedin' in session:
+        return f'Bienvenue, {session["nom"]} !'
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
 
 # Fermer la connexion MySQL à la fin du programme
-ssh_client.close()
+mysql.close()
