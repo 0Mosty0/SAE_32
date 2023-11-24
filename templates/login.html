@@ -11,24 +11,35 @@
   <div class="container">
     <img src="../static/img/logo.png" alt="Logo" class="logo">
     <h2>Heureux de te revoir</h2>
-    <form action="/signup" method="post">
+
+    <!-- Affichage des messages d'erreur -->
+    {% if error_messages %}
+      <div class="error-messages">
+        {% for message in error_messages %}
+          <div class="alert alert-danger" style="color: red;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form action="/login" method="post">
       <div class="form-group">
-        <label for="username">Nom d'utilisateur :</label>
-        <input type="text" id="username" name="username" class="input" required>
+        <label for="email">Adresse e-mail :</label>
+        <input type="email" id="email" name="email" class="input" required>
       </div>
 
       <div class="form-group">
-        <label for="password">Mot de passe :</label>
-        <input type="password" id="password" name="password" class="input" required>
+        <label for="mot_de_passe">Mot de passe :</label>
+        <input type="password" id="mot_de_passe" name="mot_de_passe" class="input" required>
       </div>
 
       <div class="form-group">
         <button type="submit" class="button">Se connecter</button> Pas encore de compte ?
-        <a href="signup.html" class="link">Créer un compte</a>
+        <a href="{{ url_for('signup') }}" class="link">Créer un compte</a>
       </div>
     </form>
   </div>
 
 </body>
 </html>
-
