@@ -29,6 +29,31 @@ class Utilisateur(db.Model):
     ville = db.Column(db.Text, nullable=True)
     tel = db.Column(db.Text, nullable=True)
 
+
+# Définition de la classe Colis
+class Colis(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    poids = db.Column(db.Integer)
+    hauteur = db.Column(db.Integer)
+    largeur = db.Column(db.Integer)
+    longueur = db.Column(db.Integer)
+    etat = db.Column(db.String(20))
+    dateEmballage = db.Column(db.Date)
+    dateArriveDepot = db.Column(db.Date)
+    dateDepartDepot = db.Column(db.Date)
+    dateLivraison = db.Column(db.Date)
+    dateReception = db.Column(db.Date)
+    expediteur_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
+    transporteur_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
+    destinataire_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
+
+    # Définir les relations avec les utilisateurs
+    expediteur = db.relationship('Utilisateur', foreign_keys=[expediteur_id])
+    transporteur = db.relationship('Utilisateur', foreign_keys=[transporteur_id])
+    destinataire = db.relationship('Utilisateur', foreign_keys=[destinataire_id])
+
+
+
 # Secret key for session management
 app.secret_key = 'your_secret_key'
 
@@ -56,7 +81,7 @@ def role_required(*roles):
             else:
                 flash("Vous n'avez pas les droits nécessaires pour accéder à cette page.", 'danger')
                 app.logger.info(f"Unauthorized access to {roles} page by user: {session.get('email')}")
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('unauthorized'))
         return decorated_function
     return decorator
 
@@ -64,6 +89,11 @@ def role_required(*roles):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/unauthorized')
+def unauthorized():
+    return render_template('unauthorized.html')
 
 # app.py
 
@@ -199,7 +229,48 @@ def mes_colis():
 @app.route('/expediteur')
 @role_required('admin', 'expediteur')
 def expediteur():
-    return 'Bienvenue dans l\'espace expéditeur !'
+    transporteurs = Utilisateur.query.filter_by(role='transporteur').all()
+    destinataires = Utilisateur.query.all()
+
+    if request.method == 'POST':
+        poids = request.form.get('poids')
+        hauteur = request.form.get('hauteur')
+        largeur = request.form.get('largeur')
+        longueur = request.form.get('longueur')
+        transporteur_id = request.form.get('transporteur_id')
+        destinataire_id = request.form.get('destinataire_id')
+
+        # Vérifier que les champs obligatoires sont renseignés
+        if not poids or not hauteur or not largeur or not longueur or not transporteur_id or not destinataire_id:
+            flash("Veuillez remplir tous les champs obligatoires.", 'danger')
+            return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
+
+        # Créer une instance de Colis
+        nouveau_colis = Colis(
+            poids=poids,
+            hauteur=hauteur,
+            largeur=largeur,
+            longueur=longueur,
+            etat='En attente',
+            dateEmballage=datetime.now().date(),
+            expediteur_id=session['id'],
+            transporteur_id=transporteur_id,
+            destinataire_id=destinataire_id
+        )
+
+        # Ajouter le colis à la base de données
+        db.session.add(nouveau_colis)
+
+        try:
+            db.session.commit()
+            flash("Le colis a été créé avec succès.", 'success')
+            return redirect(url_for('mes_colis'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de la création du colis : {e}", 'danger')
+
+    return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
+
 
 @app.route('/transporteur')
 @role_required('admin', 'transporteur')

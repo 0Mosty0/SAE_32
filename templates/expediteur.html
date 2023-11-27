@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création de Colis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Création de Colis</h2>
+
+    <form method="POST" action="{{ url_for('expediteur') }}">
+        <label for="poids">Poids (en grammes):</label>
+        <input type="text" name="poids" required>
+
+        <label for="hauteur">Hauteur (en centimètres):</label>
+        <input type="text" name="hauteur" required>
+
+        <label for="largeur">Largeur (en centimètres):</label>
+        <input type="text" name="largeur" required>
+
+        <label for="longueur">Longueur (en centimètres):</label>
+        <input type="text" name="longueur" required>
+
+        <label for="transporteur_id">Transporteur:</label>
+        <select name="transporteur_id" required>
+            {% for transporteur in transporteurs %}
+                <option value="{{ transporteur.id }}">{{ transporteur.nom }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="destinataire_id">Destinataire:</label>
+        <select name="destinataire_id" required>
+            {% for destinataire in destinataires %}
+                <option value="{{ destinataire.id }}">{{ destinataire.nom }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Créer Colis</button>
+    </form>
+</body>
+</html>
