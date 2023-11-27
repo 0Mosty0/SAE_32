@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Bienvenue, {{ nom }} !</h1>
+
+    <h2>Informations de l'utilisateur :</h2>
+    <p>Email : {{ email }}</p>
+    <p>Rôle : {{ role }}</p>
+
+    <h2>Informations du destinataire :</h2>
+    <p>Adresse : {{ adresse }}</p>
+    <p>Code Postal : {{ codePostal }}</p>
+    <p>Ville : {{ ville }}</p>
+    <p>Tel : {{ tel }}</p>
+
+    <!-- Ajoutez d'autres contenus au tableau de bord au besoin -->
+
+    <a href="{{ url_for('logout') }}">Déconnexion</a>
+</body>
+</html>
