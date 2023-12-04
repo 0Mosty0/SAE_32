@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livraisons en cours</title>
+</head>
+<body>
+
+<h1>Livraisons en cours</h1>
+
+<form method="post">
+    {% for vehicule, colis_en_cours in colis_par_vehicule.items() %}
+        <h2>{{ vehicule.marque }} {{ vehicule.modele }} - {{ vehicule.immatriculation }}</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Colis ID</th>
+                    <th>Poids</th>
+                    <th>Hauteur</th>
+                    <th>Largeur</th>
+                    <th>Longueur</th>
+                    <th>Date Livraison</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for colis, assoc in colis_en_cours %}
+                    <tr>
+                        <td>{{ colis.id }}</td>
+                        <td>{{ colis.poids }}</td>
+                        <td>{{ colis.hauteur }}</td>
+                        <td>{{ colis.largeur }}</td>
+                        <td>{{ colis.longueur }}</td>
+                        <td>{{ colis.dateLivraison }}</td>
+                        <td>
+                            {% if colis.etat == "En Livraison" %}
+                                <button type="submit" name="colis_livre" value="{{ colis.id }}">Livrée</button>
+                            {% else %}
+                                Livrée
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+</form>
+
+</body>
+</html>

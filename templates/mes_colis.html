@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Colis</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+
+<body>
+    <h1>Mes Colis</h1>
+
+    <!-- Ajoutez la carte ici -->
+    <div id="map" style="height: 400px;"></div>
+
+    <form method="post" action="{{ url_for('mes_colis') }}">
+        <!-- Vos autres éléments de formulaire ici -->
+
+        {% if colis_destinataire %}
+            {% if colis_destinataire|selectattr('etat', 'equalto', 'Livrée')|list %}
+                <!-- Afficher le bouton uniquement s'il y a des colis "Livrés" -->
+                <button type="submit" name="confirmer_reception_colis_id">Confirmer Réception</button>
+            {% endif %}
+        {% endif %}
+    </form>
+
+    <h2>Liste des Colis :</h2>
+    <ul>
+        {% for colis in colis_destinataire %}
+            <li>
+                Colis {{ colis.id }} - État : {{ colis.etat }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var colisNonLivres = {{ colis_non_livres_coords|tojson }};
+        if (colisNonLivres.length > 0) {
+            var firstColis = colisNonLivres[0];
+            var initialCenter = [parseFloat(firstColis.latitude), parseFloat(firstColis.longitude)];
+    
+            var map = L.map('map').setView(initialCenter, 10);
+    
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+    
+            colisNonLivres.forEach(function(colis) {
+                var latitude = parseFloat(colis.latitude);
+                var longitude = parseFloat(colis.longitude);
+    
+                if (!isNaN(latitude) && !isNaN(longitude)) {
+                    L.marker([latitude, longitude]).addTo(map)
+                        .bindPopup('Colis ' + colis.id);
+                }
+            });
+        } else {
+            // Aucun colis à afficher, vous pouvez définir un centre par défaut ou afficher un message.
+            console.log("Aucun colis à afficher.");
+        }
+    </script>
+    
+</body>
+
+</html>

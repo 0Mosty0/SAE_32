@@ -1,2 +1,14 @@
 Erreur lors de la connexion : (2013, 'Lost connection to MySQL server during query')
 Erreur lors de la connexion : (0, '')
+Erreur lors de l'inscription : (MySQLdb.ProgrammingError) (1146, "Table 'db_SAE32.colis' doesn't exist")
+[SQL: INSERT INTO colis (poids, hauteur, largeur, longueur, etat, `dateEmballage`, `dateArriveDepot`, `dateDepartDepot`, `dateLivraison`, `dateReception`, expediteur_id, transporteur_id, destinataire_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)]
+[parameters: ('100', '200', '300', None, 'En attente', None, None, None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Erreur lors de la création du colis : (MySQLdb.ProgrammingError) (1146, "Table 'db_SAE32.colis' doesn't exist")
+[SQL: INSERT INTO colis (poids, hauteur, largeur, longueur, etat, `dateEmballage`, `dateArriveDepot`, `dateDepartDepot`, `dateLivraison`, `dateReception`, expediteur_id, transporteur_id, destinataire_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)]
+[parameters: ('102', '800', '800', '600', 'En attente', datetime.date(2023, 11, 27), None, None, None, None, 2, '1', '4')]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Erreur lors de la création du colis : (MySQLdb.ProgrammingError) (1146, "Table 'db_SAE32.colis' doesn't exist")
+[SQL: INSERT INTO colis (poids, hauteur, largeur, longueur, etat, `dateEmballage`, `dateArriveDepot`, `dateDepartDepot`, `dateLivraison`, `dateReception`, expediteur_id, transporteur_id, destinataire_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)]
+[parameters: ('102', '800', '800', '600', 'En attente', datetime.date(2023, 11, 27), None, None, None, None, 2, '1', '4')]
+(Background on this error at: https://sqlalche.me/e/20/f405)
