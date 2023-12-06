@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préparation de Livraison</title>
+</head>
+
+<body>
+    <h1>Préparation de Livraison</h1>
+
+    <form method="post" action="{{ url_for('prepare_livraison') }}">
+        <label for="vehicule_id">Sélectionnez le véhicule :</label>
+        <select name="vehicule_id" id="vehicule_id" required>
+            {% for vehicule in vehicules %}
+            <option value="{{ vehicule.id }}" {% if vehicule.en_livraison %} disabled {% endif %}>
+                {{ vehicule.marque }} {{ vehicule.modele }} ({{ vehicule.immatriculation }})
+                {% if vehicule.en_livraison %} - En cours de livraison {% endif %}
+            </option>
+            {% endfor %}
+        </select>
+
+        <h2>Colis à livrer :</h2>
+        <ul>
+            {% for colis in colis_non_livres %}
+            <li>
+                <input type="checkbox" name="colis_ids" value="{{ colis.id }}" {% if colis.vehicule and colis.vehicule.en_livraison %} disabled {% endif %}>
+                {{ colis.id }} - Poids: {{ colis.poids }} kg, Dimensions: {{ colis.hauteur }}x{{ colis.largeur }}x{{ colis.longueur }} cm
+                {% if colis.vehicule and colis.vehicule.en_livraison %} - En cours de livraison {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <button type="submit" {% if not colis_non_livres %} disabled {% endif %}>Préparer Livraison</button>
+    </form>
+
+    <h2>Véhicules :</h2>
+    {% for vehicule in vehicules %}
+        <h3>{{ vehicule.marque }} {{ vehicule.modele }} ({{ vehicule.immatriculation }})</h3>
+        {% if not vehicule.en_livraison and vehicule.colis %}
+            <form method="post" action="{{ url_for('envoyer_vehicule', vehicule_id=vehicule.id) }}">
+                <input type="submit" value="Envoyer le véhicule">
+            </form>
+        {% endif %}
+        <ul>
+            {% for colis in vehicule.colis %}
+                <li>
+                    {% if not vehicule.en_livraison %}
+                        <form method="post" action="{{ url_for('annuler_livraison', colis_id=colis.id) }}">
+                            <input type="submit" value="Annuler Livraison">
+                        </form>
+                    {% endif %}
+                    N° Commande : {{ colis.id }} - Poids: {{ colis.poids }} kg, Dimensions: {{ colis.hauteur }}x{{ colis.largeur }}x{{ colis.longueur }} cm
+                    ({{ colis.destinataire.ville }}) ({{ colis.destinataire.adresse }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+</body>
+
+</html>

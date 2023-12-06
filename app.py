@@ -6,72 +6,70 @@ import re
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from functools import wraps
+from geopy.geocoders import Nominatim
+
 
 app = Flask(__name__)
+<<<<<<< HEAD
 
 # Configuration de la base de données
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@127.0.0.1:3306/db_sae32'
+=======
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://phpmyadmin:root@127.0.0.1:3306/db_SAE32'
+>>>>>>> 3b5bd6cba30074e3b6950571f56eb70f8019c535
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
-# Définition de la classe Utilisateur
-class Utilisateur(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nom = db.Column(db.Text, nullable=False)
-    email = db.Column(db.Text, nullable=False, unique=True)
-    mot_de_passe = db.Column(db.Text, nullable=False)
-    role = db.Column(db.String(50), default='user')
-    adresse = db.Column(db.Text, nullable=True)
-    codePostal = db.Column(db.Text, nullable=True)
-    ville = db.Column(db.Text, nullable=True)
-    tel = db.Column(db.Text, nullable=True)
-
-
-# Définition de la classe Colis
-class Colis(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    poids = db.Column(db.Integer)
-    hauteur = db.Column(db.Integer)
-    largeur = db.Column(db.Integer)
-    longueur = db.Column(db.Integer)
-    etat = db.Column(db.String(20))
-    dateEmballage = db.Column(db.Date)
-    dateArriveDepot = db.Column(db.Date)
-    dateDepartDepot = db.Column(db.Date)
-    dateLivraison = db.Column(db.Date)
-    dateReception = db.Column(db.Date)
-    expediteur_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
-    transporteur_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
-    destinataire_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
-
-    # Définir les relations avec les utilisateurs
-    expediteur = db.relationship('Utilisateur', foreign_keys=[expediteur_id])
-    transporteur = db.relationship('Utilisateur', foreign_keys=[transporteur_id])
-    destinataire = db.relationship('Utilisateur', foreign_keys=[destinataire_id])
-
-
-
-# Secret key for session management
 app.secret_key = 'your_secret_key'
 
-# Set up logging
+class Utilisateur(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nom, email, mot_de_passe = db.Column(db.Text, nullable=False), db.Column(db.Text, nullable=False, unique=True), db.Column(db.Text, nullable=False)
+    role, adresse, codePostal, ville, tel = db.Column(db.String(50), default='user'), db.Column(db.Text, nullable=True), db.Column(db.Text, nullable=True), db.Column(db.Text, nullable=True), db.Column(db.Text, nullable=True)
+    vehicules = db.relationship('Vehicule', back_populates='transporteur', lazy=True)
+
+class Colis(db.Model):
+    id, poids, hauteur, largeur, longueur, etat = db.Column(db.Integer, primary_key=True), db.Column(db.Integer), db.Column(db.Integer), db.Column(db.Integer), db.Column(db.Integer), db.Column(db.String(20))
+    dateEmballage, dateArriveDepot, dateDepartDepot, dateLivraison, dateReception = db.Column(db.Date), db.Column(db.Date), db.Column(db.Date), db.Column(db.Date), db.Column(db.Date)
+    expediteur_id, transporteur_id, destinataire_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id')), db.Column(db.Integer, db.ForeignKey('utilisateur.id')), db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
+    expediteur, adresse, ville, transporteur, destinataire = db.relationship('Utilisateur', foreign_keys=[expediteur_id]), db.relationship('Utilisateur', foreign_keys=[expediteur_id]), db.relationship('Utilisateur', foreign_keys=[expediteur_id]), db.relationship('Utilisateur', foreign_keys=[transporteur_id]), db.relationship('Utilisateur', foreign_keys=[destinataire_id])
+    vehicules = db.relationship('Vehicule', secondary='colisvehiculeassociation', back_populates='colis')
+    latitude = db.Column(db.DECIMAL(10, 8), default=None)
+    longitude = db.Column(db.DECIMAL(11, 8), default=None)
+
+class Vehicule(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    marque = db.Column(db.String(50), nullable=False)
+    modele = db.Column(db.String(50), nullable=False)
+    annee_fabrication = db.Column(db.Integer)
+    immatriculation = db.Column(db.String(20), unique=True, nullable=False)
+    latitude = db.Column(db.DECIMAL(10, 8), default=None)
+    longitude = db.Column(db.DECIMAL(11, 8), default=None)
+    en_livraison = db.Column(db.Boolean, default=False)
+    transporteur_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
+    transporteur = db.relationship('Utilisateur', back_populates='vehicules', lazy=True)
+    colis = db.relationship('Colis', secondary='colisvehiculeassociation', back_populates='vehicules')
+
+class ColisVehiculeAssociation(db.Model):
+    __tablename__ = 'colisvehiculeassociation'
+    colis_id, vehicule_id = db.Column(db.Integer, db.ForeignKey('colis.id'), primary_key=True), db.Column(db.Integer, db.ForeignKey('vehicule.id'), primary_key=True)
+    colis, vehicule = db.relationship('Colis', overlaps="colis,vehicules"), db.relationship('Vehicule', overlaps="colis,vehicules")
+
 logs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 os.makedirs(logs_dir, exist_ok=True)
 log_file = os.path.join(logs_dir, 'site.log')
 handler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=1)
-handler.setLevel(logging.INFO)  # Niveau INFO pour site.log
+handler.setLevel(logging.INFO)
 app.logger.addHandler(handler)
 
 login_log_file = os.path.join(logs_dir, 'tentative_login.log')
 login_handler = RotatingFileHandler(login_log_file, maxBytes=10000, backupCount=1)
-login_handler.setLevel(logging.WARNING)  # Niveau WARNING pour tentative_login.log
+login_handler.setLevel(logging.WARNING)
 login_logger = logging.getLogger('tentative_login')
 login_logger.addHandler(login_handler)
 
-# Decorator to check if the user has admin rights
 def role_required(*roles):
     def decorator(f):
         @wraps(f)
@@ -79,7 +77,7 @@ def role_required(*roles):
             if 'loggedin' in session and session.get('role') in roles:
                 return f(*args, **kwargs)
             else:
-                flash("Vous n'avez pas les droits nécessaires pour accéder à cette page.", 'danger')
+                flash("Vous n'avez pas les droits nécessaires.", 'danger')
                 app.logger.info(f"Unauthorized access to {roles} page by user: {session.get('email')}")
                 return redirect(url_for('unauthorized'))
         return decorated_function
@@ -90,15 +88,16 @@ def role_required(*roles):
 def index():
     return render_template('index.html')
 
-
 @app.route('/unauthorized')
 def unauthorized():
     return render_template('unauthorized.html')
 
-# app.py
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    # Vérifier si l'utilisateur est déjà connecté
+    if 'loggedin' in session:
+        return redirect(url_for('dashboard'))
+    
     if request.method == 'POST':
         nom = request.form.get('nom')
         email = request.form.get('email')
@@ -148,7 +147,6 @@ def signup():
 
     return render_template('signup.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error_messages = []
@@ -184,6 +182,7 @@ def login():
     return render_template('login.html', error_messages=error_messages)
 
 @app.route('/dashboard')
+@role_required('admin', 'transporteur','user','expediteur')
 def dashboard():
     if 'loggedin' in session:
         user_id = session.get('id')
@@ -221,16 +220,16 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/mes_colis')
-@role_required('admin', 'user')
-def mes_colis():
-    return 'Bienvenue dans l\'espace de tes colis!'
-
-@app.route('/expediteur')
+@app.route('/expediteur', methods=['GET', 'POST'])
 @role_required('admin', 'expediteur')
 def expediteur():
     transporteurs = Utilisateur.query.filter_by(role='transporteur').all()
-    destinataires = Utilisateur.query.all()
+    destinataires = Utilisateur.query.filter_by(role='user').all()
+
+    # Vérifier si l'utilisateur est connecté
+    if 'loggedin' not in session:
+        flash("Veuillez vous connecter pour accéder à cette page.", 'danger')
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
         poids = request.form.get('poids')
@@ -245,6 +244,27 @@ def expediteur():
             flash("Veuillez remplir tous les champs obligatoires.", 'danger')
             return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
 
+        # Accéder à l'ID de l'utilisateur connecté
+        user_id = session.get('id', None)
+
+        if user_id is None:
+            flash("Erreur lors de la récupération de l'ID de l'utilisateur.", 'danger')
+            return redirect(url_for('login'))
+
+        # Récupérer l'adresse de l'expéditeur
+        expediteur = Utilisateur.query.get(user_id)
+        adresse_expediteur = expediteur.adresse + ", " + expediteur.codePostal + " " + expediteur.ville
+
+        # Géocoder l'adresse pour obtenir les coordonnées GPS
+        geolocator = Nominatim(user_agent="votre_application")
+        location = geolocator.geocode(adresse_expediteur)
+
+        if location:
+            latitude, longitude = location.latitude, location.longitude
+        else:
+            flash("Erreur lors de la récupération des coordonnées GPS de l'expéditeur.", 'danger')
+            return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
+
         # Créer une instance de Colis
         nouveau_colis = Colis(
             poids=poids,
@@ -253,9 +273,11 @@ def expediteur():
             longueur=longueur,
             etat='En attente',
             dateEmballage=datetime.now().date(),
-            expediteur_id=session['id'],
+            expediteur_id=user_id,  # Utiliser l'ID de l'utilisateur connecté
             transporteur_id=transporteur_id,
-            destinataire_id=destinataire_id
+            destinataire_id=destinataire_id,
+            latitude=latitude,
+            longitude=longitude
         )
 
         # Ajouter le colis à la base de données
@@ -264,24 +286,306 @@ def expediteur():
         try:
             db.session.commit()
             flash("Le colis a été créé avec succès.", 'success')
-            return redirect(url_for('mes_colis'))
+            return redirect(url_for('dashboard'))
         except Exception as e:
             db.session.rollback()
             flash(f"Erreur lors de la création du colis : {e}", 'danger')
 
     return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
 
-
-@app.route('/transporteur')
+# Route pour la gestion des véhicules
+@app.route('/vehicule', methods=['GET', 'POST'])
 @role_required('admin', 'transporteur')
-def transporteur():
-    return 'Bienvenue dans l\'espace transporteur !'
+def gestion_vehicules():
+    if request.method == 'POST':
+        # Récupérer les données du formulaire d'ajout de véhicule
+        marque = request.form.get('marque')
+        modele = request.form.get('modele')
+        annee_fabrication = request.form.get('annee_fabrication')
+        immatriculation = request.form.get('immatriculation')
 
+        # Vérifier que tous les champs sont renseignés
+        if not marque or not modele or not annee_fabrication or not immatriculation:
+            flash("Veuillez remplir tous les champs du formulaire.", 'danger')
+            return redirect(url_for('gestion_vehicules'))
+
+        # Récupérer l'ID du transporteur depuis la session
+        transporteur_id = session['id']
+
+        # Créer une instance de Vehicule et l'associer au transporteur
+        nouveau_vehicule = Vehicule(
+            marque=marque,
+            modele=modele,
+            annee_fabrication=annee_fabrication,
+            immatriculation=immatriculation,
+            transporteur_id=transporteur_id
+        )
+
+        # Ajouter le véhicule à la base de données
+        db.session.add(nouveau_vehicule)
+
+        try:
+            # Récupérer l'adresse du transporteur
+            adresse_transporteur = Utilisateur.query.filter_by(id=transporteur_id).first().adresse
+
+            # Utiliser le service de géocodage pour obtenir les coordonnées
+            geolocator = Nominatim(user_agent="geoapi")
+            location = geolocator.geocode(adresse_transporteur)
+
+            # Mettre à jour la position GPS du nouveau véhicule
+            if location:
+                nouveau_vehicule.latitude = location.latitude
+                nouveau_vehicule.longitude = location.longitude
+
+            db.session.commit()
+            flash("Le véhicule a été ajouté avec succès.", 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de l'ajout du véhicule : {e}", 'danger')
+
+    if session.get('role') == 'admin':
+        vehicules = db.session.query(Vehicule).all()
+    else:
+        transporteur_id = session['id']
+        vehicules = Vehicule.query.filter_by(transporteur_id=transporteur_id).all()
+
+    return render_template('vehicule.html', vehicules=vehicules)
+
+
+@app.route('/prepare_livraison', methods=['GET', 'POST'])
+@role_required('admin', 'transporteur')
+def prepare_livraison():
+    # Récupérer le rôle de l'utilisateur connecté depuis la session
+    role = session.get('role')
+    # Récupérer l'ID du transporteur depuis la session
+    transporteur_id = session['id']
+
+    if request.method == 'POST':
+        vehicule_id = request.form['vehicule_id']
+        colis_ids = request.form.getlist('colis_ids')
+        annuler_livraison = 'annuler_livraison' in request.form
+
+        try:
+            vehicule = Vehicule.query.get(vehicule_id)
+
+            for colis_id in colis_ids:
+                colis = Colis.query.get(colis_id)
+
+                if annuler_livraison:
+                    # Annuler la livraison : réinitialiser les coordonnées du colis à l'adresse du transporteur
+                    geolocator = Nominatim(user_agent="my_geocoder")
+                    location = geolocator.geocode(f"{colis.expediteur.adresse}, {colis.expediteur.ville}")
+
+                    if location:
+                        colis.latitude = location.latitude
+                        colis.longitude = location.longitude
+                        colis.etat = "En attente"
+                        colis.dateArriveDepot = None
+                    else:
+                        flash("Erreur lors de la récupération de l'adresse du transporteur.", 'danger')
+                        return redirect(url_for('dashboard'))
+                else:
+                    # Préparer la livraison : mettre à jour les coordonnées du colis avec celles du véhicule
+                    colis.latitude = vehicule.latitude
+                    colis.longitude = vehicule.longitude
+                    colis.etat = "Au dépôt"
+                    colis.dateArriveDepot = datetime.now().date()
+
+                # Ajouter le colis au véhicule
+                vehicule.colis.append(colis)
+
+            db.session.commit()
+            flash("La livraison a été préparée avec succès.", 'success')
+            return redirect(url_for('prepare_livraison'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de la préparation de la livraison : {e}", 'danger')
+            return redirect(url_for('dashboard'))
+
+    else:
+        # Récupérer la liste des véhicules
+        if role == "admin":
+            vehicules = Vehicule.query.all()
+        else:  # Si c'est un transporteur, récupérer uniquement les véhicules qui lui sont attribués
+            vehicules = Vehicule.query.filter_by(transporteur_id=transporteur_id).all()
+
+        # Récupérer la liste des colis non livrés
+        colis_non_livres = Colis.query.filter_by(etat="En attente").all()
+
+        # Si c'est un transporteur, récupérer uniquement les colis qui lui sont attribués
+        if role == "transporteur":
+            colis_prepared = Colis.query.join(ColisVehiculeAssociation).join(Vehicule).filter(Vehicule.transporteur_id == transporteur_id, Colis.etat == "Au dépôt").all()
+        else:
+            colis_prepared = Colis.query.filter_by(etat="Au dépôt").all()
+
+        return render_template('prepare_livraison.html', vehicules=vehicules, colis_non_livres=colis_non_livres, colis_prepared=colis_prepared)
+
+
+@app.route('/annuler_livraison/<int:colis_id>', methods=['POST'])
+@role_required('admin', 'transporteur')
+def annuler_livraison(colis_id):
+    # Mettre le colis "En attente" et dissocier de son véhicule
+    colis = Colis.query.get(colis_id)
+    if colis:
+        # Recherche de l'association dans la table colisvehiculeassociation
+        association = ColisVehiculeAssociation.query.filter_by(colis_id=colis_id).first()
+        if association:
+            # Suppression de l'association de la table
+            db.session.delete(association)
+        colis.etat = "En attente"
+        colis.transporteur_id = None
+        db.session.commit()
+        flash(f"La livraison du colis {colis_id} a été annulée.", 'success')
+    else:
+        flash(f"Le colis {colis_id} n'existe pas.", 'danger')
+
+    return redirect(url_for('prepare_livraison'))
+
+@app.route('/envoyer_vehicule/<int:vehicule_id>', methods=['POST'])
+@role_required('admin', 'transporteur')
+def envoyer_vehicule(vehicule_id):
+    # Mettre à jour la dateDepartDepot et l'état des colis associés au véhicule
+    vehicule = Vehicule.query.get(vehicule_id)
+    if vehicule:
+        for colis in vehicule.colis:
+            colis.dateDepartDepot = datetime.now().date()
+            colis.etat = "En Livraison"
+        vehicule.en_livraison = True
+        db.session.commit()
+        flash(f"Le véhicule {vehicule_id} a été envoyé.", 'success')
+    else:
+        flash(f"Le véhicule {vehicule_id} n'existe pas.", 'danger')
+
+    return redirect(url_for('prepare_livraison'))
+
+
+import requests
+
+@app.route('/livraisons_en_cours', methods=['GET', 'POST'])
+@role_required('admin', 'transporteur')
+def livraisons_en_cours():
+    # Assurez-vous que l'utilisateur est authentifié et est un livreur ou un admin
+    if 'id' not in session or 'role' not in session or session['role'] not in ['transporteur', 'admin']:
+        # Rediriger ou afficher un message d'erreur selon votre logique
+        return redirect(url_for('unauthorized'))
+
+    # Récupérer tous les véhicules en cours de livraison
+    vehicules_en_cours = (
+        db.session.query(Vehicule)
+        .join(ColisVehiculeAssociation, Vehicule.id == ColisVehiculeAssociation.vehicule_id)
+        .join(Colis, ColisVehiculeAssociation.colis_id == Colis.id)
+        .filter(Colis.etat == "En Livraison")
+        .distinct()
+        .all()
+    )
+
+    # Récupérer tous les colis en cours de livraison classés par véhicule
+    colis_par_vehicule = {}
+    for vehicule in vehicules_en_cours:
+        colis_par_vehicule[vehicule] = (
+            db.session.query(Colis, ColisVehiculeAssociation)
+            .join(ColisVehiculeAssociation)
+            .filter(Colis.etat == "En Livraison", ColisVehiculeAssociation.vehicule_id == vehicule.id)
+            .all()
+        )
+
+    if request.method == 'POST':
+        # Récupérer les identifiants des colis marqués comme "Livrés" depuis le formulaire
+        colis_livres_ids = request.form.getlist('colis_livre')
+
+        # Mettre à jour le statut des colis marqués comme "Livrés"
+        for vehicule, colis_assoc_list in colis_par_vehicule.items():
+            for colis, assoc in colis_assoc_list:
+                if str(colis.id) in colis_livres_ids:
+                    # Supprimer l'association entre le colis et le véhicule
+                    db.session.delete(assoc)
+
+                    # Mettre à jour le statut du colis
+                    colis.etat = "Livrée"
+                    colis.dateLivraison = datetime.now()
+
+                    # Obtenir les coordonnées à partir de l'adresse du destinataire
+                    adresse_destinataire = colis.destinataire.adresse
+                    coords_destinataire = geocode(adresse_destinataire)
+
+                    if coords_destinataire:
+                        colis.latitude, colis.longitude = coords_destinataire
+
+                    # Si le véhicule n'a plus de colis, mettre à jour son statut
+                    if not vehicule.colis:
+                        vehicule.en_livraison = False
+
+        db.session.commit()
+        return redirect(url_for('livraisons_en_cours'))
+
+    return render_template('livraisons_en_cours.html', colis_par_vehicule=colis_par_vehicule)
+
+def geocode(adresse):
+    """
+    Utilise un service de géocodage pour obtenir les coordonnées à partir d'une adresse.
+    """
+    # Utilisez l'API de géocodage de votre choix (exemple : Nominatim de OpenStreetMap)
+    geocoding_api = "https://nominatim.openstreetmap.org/search"
+    params = {
+        'q': adresse,
+        'format': 'json'
+    }
+
+    response = requests.get(geocoding_api, params=params)
+    data = response.json()
+
+    if data:
+        first_result = data[0]
+        latitude = float(first_result['lat'])
+        longitude = float(first_result['lon'])
+        return latitude, longitude
+    else:
+        return None
+
+
+@app.route('/mes_colis', methods=['GET', 'POST'])
+@role_required('admin', 'user', 'transporteur', 'expediteur')
+def mes_colis():
+    # Récupérer le rôle de l'utilisateur connecté depuis la session
+    role = session.get('role')
+
+    if request.method == 'POST':
+        colis_id_reception = request.form.get('confirmer_reception_colis_id')
+        if colis_id_reception:
+            # Mettre à jour le statut du colis si le colis est "Livrée"
+            colis = Colis.query.get(colis_id_reception)
+            if colis and colis.etat == "Livrée":
+                colis.etat = "Reçue"
+                colis.dateReception = datetime.now().date()
+                db.session.commit()
+                flash(f"Réception du colis {colis_id_reception} confirmée avec succès.", 'success')
+
+    if role == 'admin':
+        # Si l'utilisateur est un administrateur, récupérer tous les colis
+        colis_destinataire = Colis.query.all()
+    else:
+        # Sinon, récupérer l'ID du destinataire depuis la session
+        destinataire_id = session['id']
+        # Récupérer la liste des colis du destinataire
+        colis_destinataire = Colis.query.filter_by(destinataire_id=destinataire_id).all()
+
+    # Récupérer les coordonnées des colis qui ne sont pas "Livrée"
+    colis_non_livres_coords = [
+        {'id': colis.id, 'latitude': colis.latitude, 'longitude': colis.longitude}
+        for colis in colis_destinataire
+        if colis.etat != "Livrée" and colis.latitude is not None and colis.longitude is not None
+    ]
+
+    return render_template('mes_colis.html', colis_destinataire=colis_destinataire, colis_non_livres_coords=colis_non_livres_coords)
+
+
+# Route pour l'espace admin
 @app.route('/admin')
 @role_required('admin')
 def admin():
     return 'Bienvenue dans l\'espace admin !'
 
-
+# Démarrer l'application si le fichier est exécuté directement
 if __name__ == '__main__':
     app.run(debug=True)

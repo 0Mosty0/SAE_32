@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,33 +43,47 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px; /* Ajout d'une marge basse */
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
+
 <body>
     <h2>Création de Colis</h2>
 
+    <!-- Instructions pour l'utilisateur -->
+    <p>Veuillez remplir les informations ci-dessous pour créer un nouveau colis.</p>
+
     <form method="POST" action="{{ url_for('expediteur') }}">
         <label for="poids">Poids (en grammes):</label>
-        <input type="text" name="poids" required>
+        <input type="text" name="poids" id="poids" required>
 
         <label for="hauteur">Hauteur (en centimètres):</label>
-        <input type="text" name="hauteur" required>
+        <input type="text" name="hauteur" id="hauteur" required>
 
         <label for="largeur">Largeur (en centimètres):</label>
-        <input type="text" name="largeur" required>
+        <input type="text" name="largeur" id="largeur" required>
 
         <label for="longueur">Longueur (en centimètres):</label>
-        <input type="text" name="longueur" required>
+        <input type="text" name="longueur" id="longueur" required>
 
         <label for="transporteur_id">Transporteur:</label>
-        <select name="transporteur_id" required>
+        <select name="transporteur_id" id="transporteur_id" required>
             {% for transporteur in transporteurs %}
                 <option value="{{ transporteur.id }}">{{ transporteur.nom }}</option>
             {% endfor %}
         </select>
 
         <label for="destinataire_id">Destinataire:</label>
-        <select name="destinataire_id" required>
+        <select name="destinataire_id" id="destinataire_id" required>
             {% for destinataire in destinataires %}
                 <option value="{{ destinataire.id }}">{{ destinataire.nom }}</option>
             {% endfor %}
@@ -77,4 +92,5 @@
         <button type="submit">Créer Colis</button>
     </form>
 </body>
+
 </html>
