@@ -13,7 +13,7 @@ from functools import wraps
 app = Flask(__name__)
 
 # Configuration de la base de données
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://phpmyadmin:root@127.0.0.1:3306/db_SAE32'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@127.0.0.1:3306/db_sae32'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
