@@ -13,13 +13,7 @@ from geopy.geocoders import Nominatim
 
 
 app = Flask(__name__)
-<<<<<<< HEAD
-
-# Configuration de la base de données
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@127.0.0.1:3306/db_sae32'
-=======
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://phpmyadmin:root@127.0.0.1:3306/db_SAE32'
->>>>>>> 3b5bd6cba30074e3b6950571f56eb70f8019c535
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 app.secret_key = 'your_secret_key'
@@ -220,13 +214,29 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/suivi_colis', methods=['GET', 'POST'])
+def suivi_colis():
+    if request.method == 'POST':
+        # Récupérer l'ID du colis à partir du formulaire
+        colis_id = request.form.get('colis_id')
+
+        # Récupérer les informations du colis depuis la base de données
+        colis = Colis.query.get(colis_id)
+
+        if colis:
+            # Vous pouvez transmettre ces informations à la page HTML pour les afficher
+            return render_template('suivi_colis.html', colis=colis)
+        else:
+            flash(f"Le colis avec l'ID {colis_id} n'existe pas.", 'danger')
+
+    return render_template('suivi_colis.html')
+
+
 @app.route('/expediteur', methods=['GET', 'POST'])
-@role_required('admin', 'expediteur')
 def expediteur():
     transporteurs = Utilisateur.query.filter_by(role='transporteur').all()
     destinataires = Utilisateur.query.filter_by(role='user').all()
 
-    # Vérifier si l'utilisateur est connecté
     if 'loggedin' not in session:
         flash("Veuillez vous connecter pour accéder à cette page.", 'danger')
         return redirect(url_for('login'))
@@ -239,26 +249,22 @@ def expediteur():
         transporteur_id = request.form.get('transporteur_id')
         destinataire_id = request.form.get('destinataire_id')
 
-        # Vérifier que les champs obligatoires sont renseignés
         if not poids or not hauteur or not largeur or not longueur or not transporteur_id or not destinataire_id:
             flash("Veuillez remplir tous les champs obligatoires.", 'danger')
             return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
 
-        # Accéder à l'ID de l'utilisateur connecté
         user_id = session.get('id', None)
 
         if user_id is None:
             flash("Erreur lors de la récupération de l'ID de l'utilisateur.", 'danger')
             return redirect(url_for('login'))
 
-        # Récupérer l'adresse de l'expéditeur
         expediteur = Utilisateur.query.get(user_id)
-        adresse_expediteur = expediteur.adresse + ", " + expediteur.codePostal + " " + expediteur.ville
+        adresse_expediteur = expediteur.adresse + ", " + expediteur.ville + " " + expediteur.codePostal + " " + "France"
 
-        # Géocoder l'adresse pour obtenir les coordonnées GPS
+        # Géocodage avec Nominatim en spécifiant le pays (France)
         geolocator = Nominatim(user_agent="votre_application")
-        location = geolocator.geocode(adresse_expediteur)
-
+        location = geolocator.geocode(adresse_expediteur, addressdetails=True)
         if location:
             latitude, longitude = location.latitude, location.longitude
         else:
@@ -506,7 +512,8 @@ def livraisons_en_cours():
                     colis.dateLivraison = datetime.now()
 
                     # Obtenir les coordonnées à partir de l'adresse du destinataire
-                    adresse_destinataire = colis.destinataire.adresse
+                    adresse_destinataire = colis.destinataire.adresse + ", " + colis.destinataire.ville + " " + colis.destinataire.codePostal + " " + "France"
+
                     coords_destinataire = geocode(adresse_destinataire)
 
                     if coords_destinataire:
@@ -574,11 +581,10 @@ def mes_colis():
     colis_non_livres_coords = [
         {'id': colis.id, 'latitude': colis.latitude, 'longitude': colis.longitude}
         for colis in colis_destinataire
-        if colis.etat != "Livrée" and colis.latitude is not None and colis.longitude is not None
+        if colis.etat != "Reçue" and colis.latitude is not None and colis.longitude is not None
     ]
 
     return render_template('mes_colis.html', colis_destinataire=colis_destinataire, colis_non_livres_coords=colis_non_livres_coords)
-
 
 # Route pour l'espace admin
 @app.route('/admin')
