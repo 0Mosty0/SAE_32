@@ -72,7 +72,6 @@ def role_required(*roles):
             if 'loggedin' in session and session.get('role') in roles:
                 return f(*args, **kwargs)
             else:
-                flash("Vous n'avez pas les droits nécessaires.", 'danger')
                 app.logger.info(f"Unauthorized access to {roles} page by user: {session.get('email')}")
                 return redirect(url_for('unauthorized'))
         return decorated_function
@@ -91,7 +90,7 @@ def unauthorized():
 def signup():
     # Vérifier si l'utilisateur est déjà connecté
     if 'loggedin' in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
     
     if request.method == 'POST':
         nom = request.form.get('nom')
@@ -106,17 +105,14 @@ def signup():
         email_valid = validate_email(email)
 
         if not email_valid or len(mot_de_passe) < 8 or not re.search("[A-Z]", mot_de_passe) or not re.search("[!@#$%^&*(),.?\":{}|<>]", mot_de_passe):
-            flash("Veuillez saisir une adresse e-mail valide et un mot de passe fort.", 'danger')
             return render_template('signup.html', email_valid=email_valid)
 
         # Vérifier si l'e-mail existe déjà
         existing_user = Utilisateur.query.filter_by(email=email).first()
         if existing_user:
-            flash("L'adresse e-mail existe déjà.", 'danger')
             return render_template('signup.html', email_valid=email_valid)
 
         if mot_de_passe != confirmation_mot_de_passe:
-            flash("Les mots de passe ne correspondent pas.", 'danger')
             return render_template('signup.html', email_valid=email_valid)
 
         mot_de_passe_hash = generate_password_hash(mot_de_passe)
@@ -130,7 +126,6 @@ def signup():
 
         try:
             db.session.commit()
-            flash("Inscription réussie. Vous pouvez maintenant vous connecter.", 'success')
             app.logger.info(f"New user registered: {email}")
             return redirect(url_for('login'))
         except Exception as e:
@@ -138,7 +133,6 @@ def signup():
             error_message = f"Erreur lors de l'inscription : {e}"
             print(error_message)
             app.logger.error(error_message)
-            flash("Erreur lors de l'inscription.", 'danger')
 
     return render_template('signup.html')
 
@@ -148,7 +142,7 @@ def login():
 
     # Vérifier si l'utilisateur est déjà connecté
     if 'loggedin' in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
 
     if request.method == 'POST':
         email = request.form.get('email')
@@ -165,7 +159,7 @@ def login():
             session['email'] = utilisateur.email
             session['role'] = utilisateur.role  # Ajout du rôle dans la session
             app.logger.info(f"User logged in: {email}")
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
         else:
             error_messages.append("Adresse e-mail ou mot de passe incorrects.")
             log_message = f"Tentative de connexion échouée pour l'utilisateur {email} depuis l'IP {request.remote_addr} à {datetime.now(pytz.timezone('Europe/Paris')).strftime('%Y-%m-%d %H:%M:%S')}"
@@ -177,7 +171,6 @@ def login():
     return render_template('login.html', error_messages=error_messages)
 
 @app.route('/dashboard')
-@role_required('admin', 'transporteur','user','expediteur')
 def dashboard():
     if 'loggedin' in session:
         user_id = session.get('id')
@@ -197,12 +190,10 @@ def dashboard():
                 ville = utilisateur.ville
                 tel = utilisateur.tel
             else:
-                flash("Aucune information de l'utilisateur trouvée.", 'danger')
                 return redirect(url_for('login'))
 
             return render_template('dashboard.html', nom=nom, email=email, role=role, adresse=adresse, codePostal=codePostal, ville=ville, tel=tel)
         else:
-            flash("Erreur lors de la récupération des informations de l'utilisateur.", 'danger')
             return redirect(url_for('login'))
     return redirect(url_for('login'))
 
@@ -211,7 +202,6 @@ def logout():
     if 'loggedin' in session:
         app.logger.info(f"User logged out: {session.get('email')}")
     session.clear()
-    flash("Vous avez été déconnecté avec succès.", 'success')
     return redirect(url_for('login'))
 
 
@@ -227,20 +217,37 @@ def suivi_colis():
         if colis:
             # Vous pouvez transmettre ces informations à la page HTML pour les afficher
             return render_template('suivi_colis.html', colis=colis)
-        else:
-            flash(f"Le colis avec l'ID {colis_id} n'existe pas.", 'danger')
+        
 
     return render_template('suivi_colis.html')
 
 
 @app.route('/expediteur', methods=['GET', 'POST'])
+@role_required('admin', 'expediteur')
 def expediteur():
     transporteurs = Utilisateur.query.filter_by(role='transporteur').all()
     destinataires = Utilisateur.query.filter_by(role='user').all()
+    expediteurs = None
+    latitude = None
+    longitude = None
 
-    if 'loggedin' not in session:
-        flash("Veuillez vous connecter pour accéder à cette page.", 'danger')
-        return redirect(url_for('login'))
+    user_id = session.get('id', None)
+    expediteur_id = user_id
+
+    if session.get('role') == 'admin':
+        expediteurs = Utilisateur.query.filter_by(role='expediteur').all()
+        expediteur_id = request.form.get('expediteur_id') or expediteur_id
+
+    expediteur = Utilisateur.query.get(expediteur_id)
+    adresse_expediteur = expediteur.adresse + ", " + expediteur.ville + " " + expediteur.codePostal + " " + "France"
+
+    geolocator = Nominatim(user_agent="votre_application")
+    location = geolocator.geocode(adresse_expediteur, addressdetails=True)
+
+    if location:
+        latitude, longitude = location.latitude, location.longitude
+    else:
+        return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires, expediteurs=expediteurs)
 
     if request.method == 'POST':
         poids = request.form.get('poids')
@@ -250,29 +257,6 @@ def expediteur():
         transporteur_id = request.form.get('transporteur_id')
         destinataire_id = request.form.get('destinataire_id')
 
-        if not poids or not hauteur or not largeur or not longueur or not transporteur_id or not destinataire_id:
-            flash("Veuillez remplir tous les champs obligatoires.", 'danger')
-            return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
-
-        user_id = session.get('id', None)
-
-        if user_id is None:
-            flash("Erreur lors de la récupération de l'ID de l'utilisateur.", 'danger')
-            return redirect(url_for('login'))
-
-        expediteur = Utilisateur.query.get(user_id)
-        adresse_expediteur = expediteur.adresse + ", " + expediteur.ville + " " + expediteur.codePostal + " " + "France"
-
-        # Géocodage avec Nominatim en spécifiant le pays (France)
-        geolocator = Nominatim(user_agent="votre_application")
-        location = geolocator.geocode(adresse_expediteur, addressdetails=True)
-        if location:
-            latitude, longitude = location.latitude, location.longitude
-        else:
-            flash("Erreur lors de la récupération des coordonnées GPS de l'expéditeur.", 'danger')
-            return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
-
-        # Créer une instance de Colis
         nouveau_colis = Colis(
             poids=poids,
             hauteur=hauteur,
@@ -280,27 +264,24 @@ def expediteur():
             longueur=longueur,
             etat='En attente',
             dateEmballage=datetime.now().date(),
-            expediteur_id=user_id,  # Utiliser l'ID de l'utilisateur connecté
+            expediteur_id=expediteur_id,
             transporteur_id=transporteur_id,
             destinataire_id=destinataire_id,
             latitude=latitude,
             longitude=longitude
         )
 
-        # Ajouter le colis à la base de données
         db.session.add(nouveau_colis)
 
         try:
             db.session.commit()
-            flash("Le colis a été créé avec succès.", 'success')
             return redirect(url_for('dashboard'))
         except Exception as e:
             db.session.rollback()
-            flash(f"Erreur lors de la création du colis : {e}", 'danger')
 
-    return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires)
+    return render_template('expediteur.html', transporteurs=transporteurs, destinataires=destinataires, expediteurs=expediteurs)
 
-# Route pour la gestion des véhicules
+# Nouvelle route pour la gestion des véhicules
 @app.route('/vehicule', methods=['GET', 'POST'])
 @role_required('admin', 'transporteur')
 def gestion_vehicules():
@@ -310,14 +291,11 @@ def gestion_vehicules():
         modele = request.form.get('modele')
         annee_fabrication = request.form.get('annee_fabrication')
         immatriculation = request.form.get('immatriculation')
+        transporteur_id = request.form.get('transporteur_id')  # Nouveau champ pour l'ID du transporteur
 
         # Vérifier que tous les champs sont renseignés
-        if not marque or not modele or not annee_fabrication or not immatriculation:
-            flash("Veuillez remplir tous les champs du formulaire.", 'danger')
+        if not marque or not modele or not annee_fabrication or not immatriculation or not transporteur_id:
             return redirect(url_for('gestion_vehicules'))
-
-        # Récupérer l'ID du transporteur depuis la session
-        transporteur_id = session['id']
 
         # Créer une instance de Vehicule et l'associer au transporteur
         nouveau_vehicule = Vehicule(
@@ -333,7 +311,8 @@ def gestion_vehicules():
 
         try:
             # Récupérer l'adresse du transporteur
-            adresse_transporteur = Utilisateur.query.filter_by(id=transporteur_id).first().adresse
+            transporteur = Utilisateur.query.filter_by(id=transporteur_id).first()
+            adresse_transporteur = f"{transporteur.adresse}, {transporteur.ville} {transporteur.codePostal} France"
 
             # Utiliser le service de géocodage pour obtenir les coordonnées
             geolocator = Nominatim(user_agent="geoapi")
@@ -345,18 +324,29 @@ def gestion_vehicules():
                 nouveau_vehicule.longitude = location.longitude
 
             db.session.commit()
-            flash("Le véhicule a été ajouté avec succès.", 'success')
         except Exception as e:
             db.session.rollback()
-            flash(f"Erreur lors de l'ajout du véhicule : {e}", 'danger')
 
     if session.get('role') == 'admin':
-        vehicules = db.session.query(Vehicule).all()
+        vehicules = db.session.query(Vehicule, Utilisateur).join(Utilisateur).all()
+        transporteurs = Utilisateur.query.filter_by(role='transporteur').all()
     else:
-        transporteur_id = session['id']
+        transporteur_id = session.get('id')
         vehicules = Vehicule.query.filter_by(transporteur_id=transporteur_id).all()
+        transporteurs = None  # L'utilisateur non-admin n'a pas besoin de voir la liste des transporteurs
 
-    return render_template('vehicule.html', vehicules=vehicules)
+    return render_template('vehicule.html', vehicules=vehicules, transporteurs=transporteurs)
+
+@app.route('/supprimer_vehicule/<int:vehicule_id>', methods=['POST'])
+@role_required('admin', 'transporteur')
+def supprimer_vehicule(vehicule_id):
+    vehicule = Vehicule.query.get_or_404(vehicule_id)
+
+    if not vehicule.en_livraison:
+        db.session.delete(vehicule)
+        db.session.commit()
+    
+    return redirect(url_for('gestion_vehicules'))
 
 
 @app.route('/prepare_livraison', methods=['GET', 'POST'])
@@ -389,7 +379,6 @@ def prepare_livraison():
                         colis.etat = "En attente"
                         colis.dateArriveDepot = None
                     else:
-                        flash("Erreur lors de la récupération de l'adresse du transporteur.", 'danger')
                         return redirect(url_for('dashboard'))
                 else:
                     # Préparer la livraison : mettre à jour les coordonnées du colis avec celles du véhicule
@@ -402,12 +391,10 @@ def prepare_livraison():
                 vehicule.colis.append(colis)
 
             db.session.commit()
-            flash("La livraison a été préparée avec succès.", 'success')
             return redirect(url_for('prepare_livraison'))
 
         except Exception as e:
             db.session.rollback()
-            flash(f"Erreur lors de la préparation de la livraison : {e}", 'danger')
             return redirect(url_for('dashboard'))
 
     else:
@@ -441,12 +428,7 @@ def annuler_livraison(colis_id):
             # Suppression de l'association de la table
             db.session.delete(association)
         colis.etat = "En attente"
-        colis.transporteur_id = None
         db.session.commit()
-        flash(f"La livraison du colis {colis_id} a été annulée.", 'success')
-    else:
-        flash(f"Le colis {colis_id} n'existe pas.", 'danger')
-
     return redirect(url_for('prepare_livraison'))
 
 @app.route('/envoyer_vehicule/<int:vehicule_id>', methods=['POST'])
@@ -460,10 +442,6 @@ def envoyer_vehicule(vehicule_id):
             colis.etat = "En Livraison"
         vehicule.en_livraison = True
         db.session.commit()
-        flash(f"Le véhicule {vehicule_id} a été envoyé.", 'success')
-    else:
-        flash(f"Le véhicule {vehicule_id} n'existe pas.", 'danger')
-
     return redirect(url_for('prepare_livraison'))
 
 
@@ -567,7 +545,6 @@ def mes_colis():
                 colis.etat = "Reçue"
                 colis.dateReception = datetime.now().date()
                 db.session.commit()
-                flash(f"Réception du colis {colis_id_reception} confirmée avec succès.", 'success')
 
     if role == 'admin':
         # Si l'utilisateur est un administrateur, récupérer tous les colis
@@ -586,12 +563,6 @@ def mes_colis():
     ]
 
     return render_template('mes_colis.html', colis_destinataire=colis_destinataire, colis_non_livres_coords=colis_non_livres_coords)
-
-# Route pour l'espace admin
-@app.route('/admin')
-@role_required('admin')
-def admin():
-    return 'Bienvenue dans l\'espace admin !'
 
 # Démarrer l'application si le fichier est exécuté directement
 if __name__ == '__main__':

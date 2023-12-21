@@ -10,43 +10,109 @@
 <body>
     <h1>Gestion des Véhicules</h1>
 
+    {% if session.get('role') == 'admin' %}
+        <!-- Formulaire pour ajouter un nouveau véhicule (visible seulement pour les admins) -->
+        <form method="post" action="{{ url_for('gestion_vehicules') }}">
+            <h2>Ajouter un Nouveau Véhicule :</h2>
+            <label for="marque">Marque :</label>
+            <input type="text" name="marque" required>
+
+            <label for="modele">Modèle :</label>
+            <input type="text" name="modele" required>
+
+            <label for="annee_fabrication">Année de fabrication :</label>
+            <input type="number" name="annee_fabrication" required>
+
+            <label for="immatriculation">Immatriculation :</label>
+            <input type="text" name="immatriculation" required>
+
+            <label for="transporteur_id">Transporteur :</label>
+            <select name="transporteur_id" required>
+                {% for transporteur in transporteurs %}
+                    <option value="{{ transporteur.id }}">{{ transporteur.nom }} {{ transporteur.prenom }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Ajouter Véhicule</button>
+        </form>
+    {% endif %}
+
+    {% if session.get('role') == 'transporteur' %}
     <form method="post" action="{{ url_for('gestion_vehicules') }}">
+        <h2>Ajouter un Nouveau Véhicule :</h2>
         <label for="marque">Marque :</label>
         <input type="text" name="marque" required>
-
+    
         <label for="modele">Modèle :</label>
         <input type="text" name="modele" required>
-
+    
         <label for="annee_fabrication">Année de fabrication :</label>
         <input type="number" name="annee_fabrication" required>
-
+    
         <label for="immatriculation">Immatriculation :</label>
         <input type="text" name="immatriculation" required>
-
+    
+        <!-- Utilisez l'ID du transporteur connecté comme valeur par défaut -->
+        <input type="hidden" name="transporteur_id" value="{{ session.get('id') }}">
+    
         <button type="submit">Ajouter Véhicule</button>
     </form>
+    
+    {% endif %}
 
     <h2>Liste des Véhicules :</h2>
-    <table>
-        <tr>
-            <th>Marque</th>
-            <th>Modèle</th>
-            <th>Année de Fabrication</th>
-            <th>Immatriculation</th>
-            <th>Coordonnées GPS</th>
-            <th>En Livraison</th>
-        </tr>
-        {% for vehicule in vehicules %}
-        <tr>
-            <td>{{ vehicule.marque }}</td>
-            <td>{{ vehicule.modele }}</td>
-            <td>{{ vehicule.annee_fabrication }}</td>
-            <td>{{ vehicule.immatriculation }}</td>
-            <td>{{ vehicule.latitude }}, {{ vehicule.longitude }}</td>
-            <td>{% if vehicule.en_livraison %}Oui{% else %}Non{% endif %}</td>
-        </tr>
+<table>
+    <tr>
+        <th>Marque</th>
+        <th>Modèle</th>
+        <th>Année de Fabrication</th>
+        <th>Immatriculation</th>
+        <th>Coordonnées GPS</th>
+        <th>En Livraison</th>
+        {% if session.get('role') == 'admin' %}<th>Transporteur</th>{% endif %}
+        <th>Action</th>
+    </tr>
+    {% if session.get('role') == 'admin' %}
+        {% for vehicule, transporteur in vehicules %}
+            <tr>
+                <td>{{ vehicule.marque }}</td>
+                <td>{{ vehicule.modele }}</td>
+                <td>{{ vehicule.annee_fabrication }}</td>
+                <td>{{ vehicule.immatriculation }}</td>
+                <td>{{ vehicule.latitude }}, {{ vehicule.longitude }}</td>
+                <td>{% if vehicule.en_livraison %}Oui{% else %}Non{% endif %}</td>
+                <td>{{ transporteur.nom }} {{ transporteur.prenom }}</td>
+                <td>
+                    {% if not vehicule.en_livraison %}
+                        <form method="post" action="{{ url_for('supprimer_vehicule', vehicule_id=vehicule.id) }}">
+                            <button type="submit">Supprimer</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
         {% endfor %}
-    </table>
+    {% else %}
+        {% for vehicule in vehicules %}
+            <tr>
+                <td>{{ vehicule.marque }}</td>
+                <td>{{ vehicule.modele }}</td>
+                <td>{{ vehicule.annee_fabrication }}</td>
+                <td>{{ vehicule.immatriculation }}</td>
+                <td>{{ vehicule.latitude }}, {{ vehicule.longitude }}</td>
+                <td>{% if vehicule.en_livraison %}Oui{% else %}Non{% endif %}</td>
+                <td>
+                    {% if not vehicule.en_livraison %}
+                        <form method="post" action="{{ url_for('supprimer_vehicule', vehicule_id=vehicule.id) }}">
+                            <button type="submit">Supprimer</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    {% endif %}
+</table>
+
+    <!-- ... (votre code HTML existant) ... -->
 </body>
 
 </html>

@@ -23,13 +23,23 @@
 
         <h2>Colis à livrer :</h2>
         <ul>
-            {% for colis in colis_non_livres %}
-            <li>
-                <input type="checkbox" name="colis_ids" value="{{ colis.id }}" {% if colis.vehicule and colis.vehicule.en_livraison %} disabled {% endif %}>
-                {{ colis.id }} - Poids: {{ colis.poids }} kg, Dimensions: {{ colis.hauteur }}x{{ colis.largeur }}x{{ colis.longueur }} cm
-                {% if colis.vehicule and colis.vehicule.en_livraison %} - En cours de livraison {% endif %}
-            </li>
-            {% endfor %}
+            {% if session.get('role') == 'admin' %}
+                {% for colis in colis_non_livres %}
+                <li>
+                    <input type="checkbox" name="colis_ids" value="{{ colis.id }}" {% if colis.vehicule and colis.vehicule.en_livraison %} disabled {% endif %}>
+                    {{ colis.id }} - Poids: {{ colis.poids }} kg, Dimensions: {{ colis.hauteur }}x{{ colis.largeur }}x{{ colis.longueur }} cm
+                    {% if colis.vehicule and colis.vehicule.en_livraison %} - En cours de livraison {% endif %}
+                </li>
+                {% endfor %}
+            {% elif session.get('role') == 'transporteur' %}
+                {% for colis in colis_non_livres if colis.transporteur_id == session.get('id') %}
+                <li>
+                    <input type="checkbox" name="colis_ids" value="{{ colis.id }}" {% if colis.vehicule and colis.vehicule.en_livraison %} disabled {% endif %}>
+                    {{ colis.id }} - Poids: {{ colis.poids }} kg, Dimensions: {{ colis.hauteur }}x{{ colis.largeur }}x{{ colis.longueur }} cm
+                    {% if colis.vehicule and colis.vehicule.en_livraison %} - En cours de livraison {% endif %}
+                </li>
+                {% endfor %}
+            {% endif %}
         </ul>
 
         <button type="submit" {% if not colis_non_livres %} disabled {% endif %}>Préparer Livraison</button>

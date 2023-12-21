@@ -58,10 +58,10 @@
         <div class="logo">Votre Logo</div>
         <nav>
             <ul>
-                <li><a href="#">Accueil</a></li>
+                <li><a href="{{ url_for('index') }}">Accueil</a></li>
                 <li><a href="#">Services</a></li>
-                <li><a href="#">Suivi</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="{{ url_for('mes_colis') }}">Suivi</a></li>
+                <li><a href="{{ url_for('dashboard') }}">Mon Compte</a></li>
             </ul>
         </nav>
     </header>

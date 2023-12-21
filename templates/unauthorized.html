@@ -20,8 +20,21 @@
             color: #333;
         }
     </style>
+    <link rel="stylesheet" href="../static/css/index.css">
+
 </head>
 <body>
+    <header>
+        <div class="logo">Votre Logo</div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                <li><a href="#">Services</a></li>
+                <li><a href="{{ url_for('mes_colis') }}">Suivi</a></li>
+                <li><a href="{{ url_for('dashboard') }}">Mon Compte</a></li>
+            </ul>
+        </nav>
+    </header>
     <h1>Accès non autorisé</h1>
     <p>Vous n'êtes pas autorisé à accéder à cette page !</p>
 </body>
