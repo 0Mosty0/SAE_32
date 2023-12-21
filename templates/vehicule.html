@@ -2,15 +2,73 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Véhicules</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <title>| OverTrack | Véhicule </title>
+   <link rel="icon" href="/static/img/OverTracking.png">
+    <link rel="stylesheet" href="../static/css/style_vehicule.css" />
+    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet"/>
 </head>
-
 <body>
-    <h1>Gestion des Véhicules</h1>
+    <!--Début navbar-->
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
+        </div>
+        <div class="sidebar">
+            <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
+            </div>
+
+            <div class="sidebar-content">
+            <ul class="lists">
+                <li class="list">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bx bx-home-alt icon"></i>
+                    <span class="link">Dashboard</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="mes_colis.html" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Commandes</span>
+                    </a>
+                </li>
+                <li class="list">
+                <a href="livraisons_en_cours.html" class="nav-link">
+                    <i class="bx bx-bus-school icon"></i>
+                    <span class="link">Livraisons</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="bottom-cotent">
+                <li class="list">
+                <a href="vehicule.html" class="nav-link">
+                    <i class="bx bx-car icon"></i>
+                    <span class="link">Véhicules</span>
+                    </a>
+                </li>
+                <li class="list">
+                <a href="#" class="nav-link">
+                    <i class="bx bx-log-out icon"></i>
+                    <span class="link">Déconnexion</span>
+                </a>
+                </li>
+            </div>
+            </div>
+        </div>
+        </nav>
+        <!--Fin navbar-->
+
+        <section class="overlay"></section>
 
     {% if session.get('role') == 'admin' %}
+        <h1>Gestion des Véhicules</h1>
+
+    
         <!-- Formulaire pour ajouter un nouveau véhicule (visible seulement pour les admins) -->
         <form method="post" action="{{ url_for('gestion_vehicules') }}">
             <h2>Ajouter un Nouveau Véhicule :</h2>
@@ -38,81 +96,80 @@
     {% endif %}
 
     {% if session.get('role') == 'transporteur' %}
-    <form method="post" action="{{ url_for('gestion_vehicules') }}">
-        <h2>Ajouter un Nouveau Véhicule :</h2>
-        <label for="marque">Marque :</label>
-        <input type="text" name="marque" required>
-    
-        <label for="modele">Modèle :</label>
-        <input type="text" name="modele" required>
-    
-        <label for="annee_fabrication">Année de fabrication :</label>
-        <input type="number" name="annee_fabrication" required>
-    
-        <label for="immatriculation">Immatriculation :</label>
-        <input type="text" name="immatriculation" required>
-    
-        <!-- Utilisez l'ID du transporteur connecté comme valeur par défaut -->
-        <input type="hidden" name="transporteur_id" value="{{ session.get('id') }}">
-    
-        <button type="submit">Ajouter Véhicule</button>
-    </form>
-    
+        <form method="post" action="{{ url_for('gestion_vehicules') }}">
+            <h2>Ajouter un Nouveau Véhicule :</h2>
+            <label for="marque">Marque :</label>
+            <input type="text" name="marque" required>
+        
+            <label for="modele">Modèle :</label>
+            <input type="text" name="modele" required>
+        
+            <label for="annee_fabrication">Année de fabrication :</label>
+            <input type="number" name="annee_fabrication" required>
+        
+            <label for="immatriculation">Immatriculation :</label>
+            <input type="text" name="immatriculation" required>
+        
+            <!-- Utilisez l'ID du transporteur connecté comme valeur par défaut -->
+            <input type="hidden" name="transporteur_id" value="{{ session.get('id') }}">
+        
+            <button type="submit">Ajouter Véhicule</button>
+        </form>
     {% endif %}
 
     <h2>Liste des Véhicules :</h2>
-<table>
-    <tr>
-        <th>Marque</th>
-        <th>Modèle</th>
-        <th>Année de Fabrication</th>
-        <th>Immatriculation</th>
-        <th>Coordonnées GPS</th>
-        <th>En Livraison</th>
-        {% if session.get('role') == 'admin' %}<th>Transporteur</th>{% endif %}
-        <th>Action</th>
-    </tr>
-    {% if session.get('role') == 'admin' %}
-        {% for vehicule, transporteur in vehicules %}
-            <tr>
-                <td>{{ vehicule.marque }}</td>
-                <td>{{ vehicule.modele }}</td>
-                <td>{{ vehicule.annee_fabrication }}</td>
-                <td>{{ vehicule.immatriculation }}</td>
-                <td>{{ vehicule.latitude }}, {{ vehicule.longitude }}</td>
-                <td>{% if vehicule.en_livraison %}Oui{% else %}Non{% endif %}</td>
-                <td>{{ transporteur.nom }} {{ transporteur.prenom }}</td>
-                <td>
-                    {% if not vehicule.en_livraison %}
-                        <form method="post" action="{{ url_for('supprimer_vehicule', vehicule_id=vehicule.id) }}">
-                            <button type="submit">Supprimer</button>
-                        </form>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    {% else %}
-        {% for vehicule in vehicules %}
-            <tr>
-                <td>{{ vehicule.marque }}</td>
-                <td>{{ vehicule.modele }}</td>
-                <td>{{ vehicule.annee_fabrication }}</td>
-                <td>{{ vehicule.immatriculation }}</td>
-                <td>{{ vehicule.latitude }}, {{ vehicule.longitude }}</td>
-                <td>{% if vehicule.en_livraison %}Oui{% else %}Non{% endif %}</td>
-                <td>
-                    {% if not vehicule.en_livraison %}
-                        <form method="post" action="{{ url_for('supprimer_vehicule', vehicule_id=vehicule.id) }}">
-                            <button type="submit">Supprimer</button>
-                        </form>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    {% endif %}
-</table>
+    <table>
+        <tr>
+            <th>Marque</th>
+            <th>Modèle</th>
+            <th>Année de Fabrication</th>
+            <th>Immatriculation</th>
+            <th>Coordonnées GPS</th>
+            <th>En Livraison</th>
+            {% if session.get('role') == 'admin' %}<th>Transporteur</th>{% endif %}
+            <th>Action</th>
+        </tr>
+        {% if session.get('role') == 'admin' %}
+            {% for vehicule, transporteur in vehicules %}
+                <tr>
+                    <td>{{ vehicule.marque }}</td>
+                    <td>{{ vehicule.modele }}</td>
+                    <td>{{ vehicule.annee_fabrication }}</td>
+                    <td>{{ vehicule.immatriculation }}</td>
+                    <td>{{ vehicule.latitude }}, {{ vehicule.longitude }}</td>
+                    <td>{% if vehicule.en_livraison %}Oui{% else %}Non{% endif %}</td>
+                    <td>{{ transporteur.nom }} {{ transporteur.prenom }}</td>
+                    <td>
+                        {% if not vehicule.en_livraison %}
+                            <form method="post" action="{{ url_for('supprimer_vehicule', vehicule_id=vehicule.id) }}">
+                                <button type="submit">Supprimer</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            {% for vehicule in vehicules %}
+                <tr>
+                    <td>{{ vehicule.marque }}</td>
+                    <td>{{ vehicule.modele }}</td>
+                    <td>{{ vehicule.annee_fabrication }}</td>
+                    <td>{{ vehicule.immatriculation }}</td>
+                    <td>{{ vehicule.latitude }}, {{ vehicule.longitude }}</td>
+                    <td>{% if vehicule.en_livraison %}Oui{% else %}Non{% endif %}</td>
+                    <td>
+                        {% if not vehicule.en_livraison %}
+                            <form method="post" action="{{ url_for('supprimer_vehicule', vehicule_id=vehicule.id) }}">
+                                <button type="submit">Supprimer</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
 
-    <!-- ... (votre code HTML existant) ... -->
-</body>
+
+<script src="../static/js/script.js"></script>  
 
 </html>
