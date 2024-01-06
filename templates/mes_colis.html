@@ -15,15 +15,23 @@
     <div id="map" style="height: 400px;"></div>
 
     <form method="post" action="{{ url_for('mes_colis') }}">
-        <!-- Vos autres éléments de formulaire ici -->
-
         {% if colis_destinataire %}
             {% if colis_destinataire|selectattr('etat', 'equalto', 'Livrée')|list %}
-                <!-- Afficher le bouton uniquement s'il y a des colis "Livrés" -->
-                <button type="submit" name="confirmer_reception_colis_id">Confirmer Réception</button>
+                <ul>
+                    {% for colis in colis_destinataire %}
+                        {% if colis.etat == 'Livrée' %}
+                            <li>
+                                Colis {{ colis.id }} - État : {{ colis.etat }}
+                                <button type="submit" name="confirmer_reception_colis_id" value="{{ colis.id }}">Confirmer Réception</button>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             {% endif %}
         {% endif %}
     </form>
+    
+    
 
     <h2>Liste des Colis :</h2>
     <ul>
