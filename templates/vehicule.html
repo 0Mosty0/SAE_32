@@ -25,34 +25,52 @@
             <div class="sidebar-content">
             <ul class="lists">
                 <li class="list">
-                <a href="dashboard.html" class="nav-link">
+                <a href="{{ url_for('index') }}" class="nav-link">
                     <i class="bx bx-home-alt icon"></i>
-                    <span class="link">Dashboard</span>
+                    <span class="link">Menu Principal</span>
                 </a>
                 </li>
                 <li class="list">
-                <a href="mes_colis.html" class="nav-link">
-                    <i class="bx bx-clipboard icon"></i>
-                    <span class="link">Commandes</span>
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">
+                        <i class="bx bx-user icon"></i>
+                        <span class="link">Mon compte</span>
                     </a>
+                    </li>
+                <li class="list">
+                <a href="{{ url_for('expediteur') }}" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Expédier</span>
+                </a>
                 </li>
                 <li class="list">
-                <a href="livraisons_en_cours.html" class="nav-link">
+                <a href="{{ url_for('mes_colis') }}" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Commandes</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="{{ url_for('livraisons_en_cours') }}" class="nav-link">
                     <i class="bx bx-bus-school icon"></i>
                     <span class="link">Livraisons</span>
-                    </a>
+                </a>
                 </li>
             </ul>
 
             <div class="bottom-cotent">
                 <li class="list">
-                <a href="vehicule.html" class="nav-link">
+                <a href="{{ url_for('gestion_vehicules') }}" class="nav-link">
                     <i class="bx bx-car icon"></i>
                     <span class="link">Véhicules</span>
-                    </a>
+                </a>
                 </li>
                 <li class="list">
-                <a href="#" class="nav-link">
+                    <a href="{{ url_for('prepare_livraison') }}" class="nav-link">
+                        <i class="bx bx-package icon"></i>
+                        <span class="link">Préparation Véhicules</span>
+                    </a>
+                    </li>
+                <li class="list">
+                <a href="{{ url_for('logout') }}" class="nav-link">
                     <i class="bx bx-log-out icon"></i>
                     <span class="link">Déconnexion</span>
                 </a>

@@ -6,12 +6,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
    <title>| OverTrack | Mes colis</title>
    <link rel="icon" href="/static/img/OverTracking.png">
-    <link rel="stylesheet" href="../static/css/style_dashboard.css" />
+    <link rel="stylesheet" href="../static/css/style_index.css" />
     <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 
 <body>
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
+        </div>
+        <div class="sidebar">
+            <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
+            </div>
+
+            <div class="sidebar-content">
+            <ul class="lists">
+                <li class="list">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="bx bx-home-alt icon"></i>
+                    <span class="link">Menu Principal</span>
+                </a>
+                </li>
+                <li class="list">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">
+                        <i class="bx bx-user icon"></i>
+                        <span class="link">Mon compte</span>
+                    </a>
+                    </li>
+                <li class="list">
+                <a href="{{ url_for('expediteur') }}" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Expédier</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="{{ url_for('mes_colis') }}" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Commandes</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="{{ url_for('livraisons_en_cours') }}" class="nav-link">
+                    <i class="bx bx-bus-school icon"></i>
+                    <span class="link">Livraisons</span>
+                </a>
+                </li>
+            </ul>
+
+            <div class="bottom-cotent">
+                <li class="list">
+                <a href="{{ url_for('gestion_vehicules') }}" class="nav-link">
+                    <i class="bx bx-car icon"></i>
+                    <span class="link">Véhicules</span>
+                </a>
+                </li>
+                <li class="list">
+                    <a href="{{ url_for('prepare_livraison') }}" class="nav-link">
+                        <i class="bx bx-package icon"></i>
+                        <span class="link">Préparation Véhicules</span>
+                    </a>
+                    </li>
+                <li class="list">
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    <i class="bx bx-log-out icon"></i>
+                    <span class="link">Déconnexion</span>
+                </a>
+                </li>
+            </div>
+            </div>
+        </div>
+        </nav>
+
     <h1>Mes Colis</h1>
 
     <!-- Ajoutez la carte ici -->
@@ -74,5 +143,5 @@
     </script>
     
 </body>
-
+<script src="../static/js/script.js"></script> 
 </html>

@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accès non autorisé</title>
+    <title>| OverTrack | Unauthorized </title>
+   <link rel="icon" href="/static/img/OverTracking.png">
+    <link rel="stylesheet" href="../static/css/style_index.css" />
+    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet"/>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,18 +27,78 @@
 
 </head>
 <body>
-    <header>
-        <div class="logo">Votre Logo</div>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('index') }}">Accueil</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="{{ url_for('mes_colis') }}">Suivi</a></li>
-                <li><a href="{{ url_for('dashboard') }}">Mon Compte</a></li>
+
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
+        </div>
+        <div class="sidebar">
+            <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
+            </div>
+
+            <div class="sidebar-content">
+            <ul class="lists">
+                <li class="list">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="bx bx-home-alt icon"></i>
+                    <span class="link">Menu Principal</span>
+                </a>
+                </li>
+                <li class="list">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">
+                        <i class="bx bx-user icon"></i>
+                        <span class="link">Mon compte</span>
+                    </a>
+                    </li>
+                <li class="list">
+                <a href="{{ url_for('expediteur') }}" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Expédier</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="{{ url_for('mes_colis') }}" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Commandes</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="{{ url_for('livraisons_en_cours') }}" class="nav-link">
+                    <i class="bx bx-bus-school icon"></i>
+                    <span class="link">Livraisons</span>
+                </a>
+                </li>
             </ul>
+
+            <div class="bottom-cotent">
+                <li class="list">
+                <a href="{{ url_for('gestion_vehicules') }}" class="nav-link">
+                    <i class="bx bx-car icon"></i>
+                    <span class="link">Véhicules</span>
+                </a>
+                </li>
+                <li class="list">
+                    <a href="{{ url_for('prepare_livraison') }}" class="nav-link">
+                        <i class="bx bx-package icon"></i>
+                        <span class="link">Préparation Véhicules</span>
+                    </a>
+                    </li>
+                <li class="list">
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    <i class="bx bx-log-out icon"></i>
+                    <span class="link">Déconnexion</span>
+                </a>
+                </li>
+            </div>
+            </div>
+        </div>
         </nav>
-    </header>
+
     <h1>Accès non autorisé</h1>
     <p>Vous n'êtes pas autorisé à accéder à cette page !</p>
 </body>
+<script src="../static/js/script.js"></script> 
 </html>
