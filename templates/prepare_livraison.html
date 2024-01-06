@@ -37,26 +37,29 @@
                     </a>
                     </li>
                 <li class="list">
+                    {% if 'loggedin' in session and session['role'] in ['admin', 'expediteur'] %}
                 <a href="{{ url_for('expediteur') }}" class="nav-link">
-                    <i class="bx bx-clipboard icon"></i>
+                    <i class="bx bx-send icon"></i>
                     <span class="link">Expédier</span>
                 </a>
+                {% endif %}
                 </li>
                 <li class="list">
                 <a href="{{ url_for('mes_colis') }}" class="nav-link">
                     <i class="bx bx-clipboard icon"></i>
-                    <span class="link">Commandes</span>
-                </a>
-                </li>
-                <li class="list">
-                <a href="{{ url_for('livraisons_en_cours') }}" class="nav-link">
-                    <i class="bx bx-bus-school icon"></i>
-                    <span class="link">Livraisons</span>
+                    <span class="link">Mes Colis</span>
                 </a>
                 </li>
             </ul>
 
             <div class="bottom-cotent">
+                {% if 'loggedin' in session and session['role'] in ['admin', 'transporteur'] %}
+                <li class="list">
+                    <a href="{{ url_for('livraisons_en_cours') }}" class="nav-link">
+                        <i class="bx bx-mail-send icon"></i>
+                        <span class="link">Livraisons</span>
+                    </a>
+                </li>
                 <li class="list">
                 <a href="{{ url_for('gestion_vehicules') }}" class="nav-link">
                     <i class="bx bx-car icon"></i>
@@ -66,9 +69,10 @@
                 <li class="list">
                     <a href="{{ url_for('prepare_livraison') }}" class="nav-link">
                         <i class="bx bx-package icon"></i>
-                        <span class="link">Préparation Véhicules</span>
+                        <span class="link">Préparation</span>
                     </a>
                     </li>
+                    {% endif %}
                 <li class="list">
                 <a href="{{ url_for('logout') }}" class="nav-link">
                     <i class="bx bx-log-out icon"></i>
