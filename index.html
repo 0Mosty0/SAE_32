@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <title>| OverTrack | Dashboard</title>
+   <title>| OverTrack |</title>
     <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="../static/css/style_dashboard.css">
+    <link rel="stylesheet" href="../static/css/style_index.css">
 </head>
 <body>
     <nav>
@@ -60,24 +60,15 @@
         </div>
         </nav>
     <section class="overlay"></section>
-  
-    <div class="container">
-        <h1>Bienvenue, {{ nom }} !</h1>
 
-        <h2>Informations de l'utilisateur :</h2>
-        <p>Email : {{ email }}</p>
-        <p>Rôle : {{ role }}</p>
-
-        <h2>Informations du destinataire :</h2>
-        <p>Adresse : {{ adresse }}</p>
-        <p>Code Postal : {{ codePostal }}</p>
-        <p>Ville : {{ ville }}</p>
-        <p>Tel : {{ tel }}</p>
-
-        <!-- Ajoutez d'autres contenus au tableau de bord au besoin -->
-
-        <a href="{{ url_for('logout') }}">Déconnexion</a>
-    </div>
-    <script src="../static/js/script.js"></script>
+    <section class="main-content">
+        <h1>Bienvenue chez UPS</h1>
+        <p>Expédition rapide et fiable à travers le monde.</p>
+        <a href="#" class="btn">En savoir plus</a>
+    </section>
+    <footer>
+        <p>&copy; 2023 Votre Société. Tous droits réservés.</p>
+    </footer>
+    <script src="static/js/script.js"></script>
 </body>
 </html>

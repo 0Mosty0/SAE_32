@@ -5,58 +5,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Création de Colis</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 20px;
-        }
-
-        form {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            text-align: left;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 16px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background-color: #4caf50;
-            color: #fff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        p {
-            color: #666;
-            margin-bottom: 20px;
-        }
-    </style>
 </head>
 
 <body>
+        <!--Début navbar-->
+        <nav>
+            <div class="logo">
+                <i class="bx bx-menu menu-icon"></i>
+                <span class="logo-name">OverTracking</span>
+            </div>
+            <div class="sidebar">
+                <div class="logo">
+                <i class="bx bx-menu menu-icon"></i>
+                <span class="logo-name">OverTracking</span>
+                </div>
+    
+                <div class="sidebar-content">
+                <ul class="lists">
+                    <li class="list">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="bx bx-home-alt icon"></i>
+                        <span class="link">Dashboard</span>
+                    </a>
+                    </li>
+                    <li class="list">
+                    <a href="mes_colis.html" class="nav-link">
+                        <i class="bx bx-clipboard icon"></i>
+                        <span class="link">Commandes</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                    <a href="livraisons_en_cours.html" class="nav-link">
+                        <i class="bx bx-bus-school icon"></i>
+                        <span class="link">Livraisons</span>
+                        </a>
+                    </li>
+                </ul>
+    
+                <div class="bottom-cotent">
+                    <li class="list">
+                    <a href="vehicule.html" class="nav-link">
+                        <i class="bx bx-car icon"></i>
+                        <span class="link">Véhicules</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                    <a href="#" class="nav-link">
+                        <i class="bx bx-log-out icon"></i>
+                        <span class="link">Déconnexion</span>
+                    </a>
+                    </li>
+                </div>
+                </div>
+            </div>
+            </nav>
+            <!--Fin navbar-->
+    
+            <section class="overlay"></section>
     <h2>Création de Colis</h2>
 
     <!-- Instructions pour l'utilisateur -->
@@ -103,6 +108,7 @@
 
         <button type="submit">Créer Colis</button>
     </form>
+    <script src="../static/js/script.js"></script>  
 </body>
 
 </html>
