@@ -10,6 +10,19 @@
     <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
+<style>
+    #map-container {
+        width: 75%;
+        margin: 0 auto; /* Cela centre le conteneur à la page */
+        position: relative;
+    }
+
+    #map {
+        height: 400px;
+        width: 100%; /* Cela étend la largeur de la carte sur toute la largeur du conteneur */
+        z-index: -1;
+    }
+</style>
 
 <body>
     <nav>
@@ -85,10 +98,12 @@
         </div>
         </nav>
 
-    <h1>Mes Colis</h1>
+        <h1>Mes Colis</h1>
 
-    <!-- Ajoutez la carte ici -->
-    <div id="map" style="height: 400px;"></div>
+    <!-- Si l'utilisateur est un autre type, affichez la carte et les informations sur les colis -->
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
 
     <form method="post" action="{{ url_for('mes_colis') }}">
         {% if colis_destinataire %}
@@ -107,8 +122,6 @@
         {% endif %}
     </form>
     
-    
-
     <h2>Liste des Colis :</h2>
     <ul>
         {% for colis in colis_destinataire %}
@@ -124,17 +137,17 @@
         if (colisNonLivres.length > 0) {
             var firstColis = colisNonLivres[0];
             var initialCenter = [parseFloat(firstColis.latitude), parseFloat(firstColis.longitude)];
-    
+
             var map = L.map('map').setView(initialCenter, 10);
-    
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
-    
+
             colisNonLivres.forEach(function(colis) {
                 var latitude = parseFloat(colis.latitude);
                 var longitude = parseFloat(colis.longitude);
-    
+
                 if (!isNaN(latitude) && !isNaN(longitude)) {
                     L.marker([latitude, longitude]).addTo(map)
                         .bindPopup('Colis ' + colis.id);
@@ -146,6 +159,8 @@
         }
     </script>
     
+    <script src="../static/js/script.js"></script> 
 </body>
-<script src="../static/js/script.js"></script> 
 </html>
+
+        
