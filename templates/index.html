@@ -1,70 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/index.css">
-    <title>Votre Titre</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <title>| OverTrack |</title>
+    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../static/css/style_index.css">
 </head>
 <body>
-<<<<<<< HEAD
-    <!-- navbar -->
-        
-    <!-- fin navbar -->
-    <div>
-        <h1 style="align-content: center;">Bienvenue</h1>
-    </div>
-
-
-
-
-
-
-
-    <!--footer-->
-    <footer class="footer">
-        <div class="waves">
-            <div class="wave" id="wave1"></div>
-            <div class="wave" id="wave2"></div>
-            <div class="wave" id="wave3"></div>
-            <div class="wave" id="wave4"></div>
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
         </div>
-        <ul class="social-icon">
-            <li class="social-icon__item"><a class="social-icon__link" href="#">
-                <ion-icon name="logo-twitter"></ion-icon>
-            </a></li>
-            <li class="social-icon__item"><a class="social-icon__link" href="#">
-                <ion-icon name="logo-linkedin"></ion-icon>
-            </a></li>
-            <li class="social-icon__item"><a class="social-icon__link" href="#">
-                <ion-icon name="logo-instagram"></ion-icon>
-            </a></li>
-        </ul>
-        <ul class="menu">
-            <li class="menu__item"><a class="menu__link" href="#">Home</a></li>
-            <li class="menu__item"><a class="menu__link" href="#">About</a></li>
-            <li class="menu__item"><a class="menu__link" href="#">Services</a></li>
-            <li class="menu__item"><a class="menu__link" href="#">Team</a></li>
-            <li class="menu__item"><a class="menu__link" href="#">Contact</a></li>
-    
-        </ul>
-        <p>&copy;2023 OverTracking_SAE-32 | All Rights Reserved</p>
-    </footer>
-    <!--fin footer -->
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-=======
-    <header>
-        <div class="logo">Votre Logo</div>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('index') }}">Accueil</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="{{ url_for('mes_colis') }}">Suivi</a></li>
-                <li><a href="{{ url_for('dashboard') }}">Mon Compte</a></li>
+        <div class="sidebar">
+            <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <span class="logo-name">OverTracking</span>
+            </div>
+
+            <div class="sidebar-content">
+            <ul class="lists">
+                <li class="list">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bx bx-home-alt icon"></i>
+                    <span class="link">Dashboard</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="mes_colis.html" class="nav-link">
+                    <i class="bx bx-clipboard icon"></i>
+                    <span class="link">Commandes</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="livraisons_en_cours.html" class="nav-link">
+                    <i class="bx bx-bus-school icon"></i>
+                    <span class="link">Livraisons</span>
+                </a>
+                </li>
             </ul>
+
+            <div class="bottom-cotent">
+                <li class="list">
+                <a href="vehicule.html" class="nav-link">
+                    <i class="bx bx-car icon"></i>
+                    <span class="link">Véhicules</span>
+                </a>
+                </li>
+                <li class="list">
+                <a href="#" class="nav-link">
+                    <i class="bx bx-log-out icon"></i>
+                    <span class="link">Déconnexion</span>
+                </a>
+                </li>
+            </div>
+            </div>
+        </div>
         </nav>
-    </header>
+    <section class="overlay"></section>
+
     <section class="main-content">
         <h1>Bienvenue chez UPS</h1>
         <p>Expédition rapide et fiable à travers le monde.</p>
@@ -73,6 +69,6 @@
     <footer>
         <p>&copy; 2023 Votre Société. Tous droits réservés.</p>
     </footer>
->>>>>>> 21002342c9224e54598c5aac84375162b642c107
+    <script src="static/js/script.js"></script>
 </body>
 </html>
