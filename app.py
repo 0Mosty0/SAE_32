@@ -566,5 +566,5 @@ def mes_colis():
 
 # Démarrer l'application si le fichier est exécuté directement
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=3456)
 
